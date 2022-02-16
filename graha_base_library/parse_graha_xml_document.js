@@ -64,7 +64,7 @@ function parse_graha_xml_document(result) {
 							} else {
 								var row = new Object();
 								for(var z = 0; z < root[i].childNodes[x].childNodes[y].childNodes.length; z++) {
-									if(root[i].childNodes[x].childNodes[y].childNodes[z].nodeType == 1) {
+									if(root[i].childNodes[x].childNodes[y].childNodes[z].nodeType == 1 && root[i].childNodes[x].childNodes[y].childNodes[z].firstChild != null) {
 										row[root[i].childNodes[x].childNodes[y].childNodes[z].nodeName] = root[i].childNodes[x].childNodes[y].childNodes[z].firstChild.nodeValue;
 									}
 								}
