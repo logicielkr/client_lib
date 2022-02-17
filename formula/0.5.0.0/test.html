@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+<meta charset="utf-8" />
+<title>GrahaFormula Test Page</title>
+<script src="GrahaFormula.js"></script>
+<script>
+	function execute(index) {
+		var result = GrahaFormula.parseFormula(document.forms["formula"].elements["formula." + index].value);
+		console.log(JSON.stringify(result.expr));
+		console.log(JSON.stringify(result.refer));
+		document.forms["formula"].elements["result." + index].value = result.expr.valueOf();
+	}
+	function exec(index, formName) {
+		GrahaFormula.INDEX = index;
+		if(formName == "sample_indexed_name") {
+			var result = GrahaFormula.parseFormula(document.forms[formName].elements["formula." + index].value);
+			console.log(JSON.stringify(result.expr));
+			console.log(JSON.stringify(result.refer));
+			document.forms[formName].elements["result." + index].value = result.expr.valueOf();
+		} else if(formName == "sample_same_name") {
+			if(document.forms[formName].elements["formula"].length) {
+				var result = GrahaFormula.parseFormula(document.forms[formName].elements["formula"][index].value);
+				console.log(JSON.stringify(result.expr));
+				console.log(JSON.stringify(result.refer));
+				document.forms[formName].elements["result"][index].value = result.expr.valueOf();
+			} else {
+				var result = GrahaFormula.parseFormula(document.forms[formName].elements["formula"].value);
+				console.log(JSON.stringify(result.expr));
+				console.log(JSON.stringify(result.refer));
+				document.forms[formName].elements["result"].value = result.expr.valueOf();
+			}
+		}
+		
+	}
+</script>
+</head>
+<body>
+<h3>수식 실행(form[name='formula'])</h3>
+<form name="formula">
+	<table>
+		<tr>
+			<th>수식(input[name='formula.{N}'])</th>
+			<th>예상값(input[name='expected.{N}'])</th>
+			<th>실행</th>
+			<th>결과(input[name='result.{N}'])</th>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.1" value="1" /></td>
+			<td><input type="text" name="expected.1" value="1" /></td>
+			<td><input type="button" value="execute" onclick="execute(1)" /></td>
+			<td><input type="text" name="result.1" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.2" value="1 + 1" /></td>
+			<td><input type="text" name="expected.2" value="2" /></td>
+			<td><input type="button" value="execute" onclick="execute(2)" /></td>
+			<td><input type="text" name="result.2" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.3" value="trim(' 1')" /></td>
+			<td><input type="text" name="expected.3" value="1" /></td>
+			<td><input type="button" value="execute" onclick="execute(3)" /></td>
+			<td><input type="text" name="result.3" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.4" value="2 * (3 + 1) * 2 & trim(' 1')" /></td>
+			<td><input type="text" name="expected.4" value="161" /></td>
+			<td><input type="button" value="execute" onclick="execute(4)" /></td>
+			<td><input type="text" name="result.4" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.5" value="number(trim('1,000'))" /></td>
+			<td><input type="text" name="expected.5" value="1000" /></td>
+			<td><input type="button" value="execute" onclick="execute(5)" /></td>
+			<td><input type="text" name="result.5" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.6" value="upper(trim(' a '))" /></td>
+			<td><input type="text" name="expected.6" value="A" /></td>
+			<td><input type="button" value="execute" onclick="execute(6)" /></td>
+			<td><input type="text" name="result.6" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.7" value="lower(trim(' A '))" /></td>
+			<td><input type="text" name="expected.7" value="a" /></td>
+			<td><input type="button" value="execute" onclick="execute(7)" /></td>
+			<td><input type="text" name="result.7" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.8" value="trim(' 2') * 3" /></td>
+			<td><input type="text" name="expected.8" value="6" /></td>
+			<td><input type="button" value="execute" onclick="execute(8)" /></td>
+			<td><input type="text" name="result.8" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.9" value="' 2' * 3" /></td>
+			<td><input type="text" name="expected.9" value="6" /></td>
+			<td><input type="button" value="execute" onclick="execute(9)" /></td>
+			<td><input type="text" name="result.9" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.10" value="comma(' 2000' * 3)" /></td>
+			<td><input type="text" name="expected.10" value="6,000" /></td>
+			<td><input type="button" value="execute" onclick="execute(10)" /></td>
+			<td><input type="text" name="result.10" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.11" value="max(1, 2, 3)" /></td>
+			<td><input type="text" name="expected.11" value="3" /></td>
+			<td><input type="button" value="execute" onclick="execute(11)" /></td>
+			<td><input type="text" name="result.11" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.12" value="min(1, 2, 3)" /></td>
+			<td><input type="text" name="expected.12" value="1" /></td>
+			<td><input type="button" value="execute" onclick="execute(12)" /></td>
+			<td><input type="text" name="result.12" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.13" value="round(1.2)" /></td>
+			<td><input type="text" name="expected.13" value="1" /></td>
+			<td><input type="button" value="execute" onclick="execute(13)" /></td>
+			<td><input type="text" name="result.13" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.14" value="round(1.5)" /></td>
+			<td><input type="text" name="expected.14" value="2" /></td>
+			<td><input type="button" value="execute" onclick="execute(14)" /></td>
+			<td><input type="text" name="result.14" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.15" value="round(1.9)" /></td>
+			<td><input type="text" name="expected.15" value="2" /></td>
+			<td><input type="button" value="execute" onclick="execute(15)" /></td>
+			<td><input type="text" name="result.15" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.16" value="floor(1.9)" /></td>
+			<td><input type="text" name="expected.16" value="1" /></td>
+			<td><input type="button" value="execute" onclick="execute(16)" /></td>
+			<td><input type="text" name="result.16" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.17" value="ceil(1.1)" /></td>
+			<td><input type="text" name="expected.17" value="2" /></td>
+			<td><input type="button" value="execute" onclick="execute(17)" /></td>
+			<td><input type="text" name="result.17" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.18" value="sum(1,'9,000')" /></td>
+			<td><input type="text" name="expected.18" value="9001" /></td>
+			<td><input type="button" value="execute" onclick="execute(18)" /></td>
+			<td><input type="text" name="result.18" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.19" value="sum(sample_indexed_name#result.1:sample_indexed_name#result.4)" /></td>
+			<td><input type="text" name="expected.19" value="10" /></td>
+			<td><input type="button" value="execute" onclick="execute(19)" /></td>
+			<td><input type="text" name="result.19" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.20" value="nvl(sample_indexed_name#result.1, 0) + nvl(sample_indexed_name#result.4, 0)" /></td>
+			<td><input type="text" name="expected.20" value="5" /></td>
+			<td><input type="button" value="execute" onclick="execute(20)" /></td>
+			<td><input type="text" name="result.20" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="formula.21" value="sum(sample_same_name#result)" /></td>
+			<td><input type="text" name="expected.21" value="10" /></td>
+			<td><input type="button" value="execute" onclick="execute(21)" /></td>
+			<td><input type="text" name="result.21" value="" /></td>
+		</tr>
+	</table>
+</form>
+<h3>샘플 데이타(form[name='sample_same_name'])</h3>
+<form name="sample_same_name">
+	<table>
+		<tr>
+			<th>데이타(input[name='data'])</th>
+			<th>수식(input[name='formula'])</th>
+			<th>예상값(input[name='expected'])</th>
+			<th>실행</th>
+			<th>결과(input[name='result'])</th>
+		</tr>
+		<tr>
+			<td><input type="text" name="data" value="1" /></td>
+			<td><input type="text" name="formula" value="sample_same_name#data[N] * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected" value="330" /></td>
+			<td><input type="button" value="execute" onclick="exec(0, 'sample_same_name')" /></td>
+			<td><input type="text" name="result" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="data" value="2" /></td>
+			<td><input type="text" name="formula" value="sample_same_name#data[N] * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected" value="660" /></td>
+			<td><input type="button" value="execute" onclick="exec(1, 'sample_same_name')" /></td>
+			<td><input type="text" name="result" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="data" value="3" /></td>
+			<td><input type="text" name="formula" value="sample_same_name#data[N] * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected" value="990" /></td>
+			<td><input type="button" value="execute" onclick="exec(2, 'sample_same_name')" /></td>
+			<td><input type="text" name="result" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="data" value="4" /></td>
+			<td><input type="text" name="formula" value="sample_same_name#data[N] * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected" value="1320" /></td>
+			<td><input type="button" value="execute" onclick="exec(3, 'sample_same_name')" /></td>
+			<td><input type="text" name="result" value="" /></td>
+		</tr>
+	</table>
+</form>
+<h3>샘플 데이타(form[name='sample_indexed_name'])</h3>
+<form name="sample_indexed_name">
+	<table>
+		<tr>
+			<th>데이타(input[name='data.{N}'])</th>
+			<th>수식(input[name='formula.{N}'])</th>
+			<th>예상값(input[name='expected.{N}'])</th>
+			<th>실행</th>
+			<th>결과(input[name='result.{N}'])</th>
+		</tr>
+		<tr>
+			<td><input type="text" name="data.1" value="1" /></td>
+			<td><input type="text" name="formula.1" value="sample_indexed_name#data.{N} * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected.1" value="330" /></td>
+			<td><input type="button" value="execute" onclick="exec(1, 'sample_indexed_name')" /></td>
+			<td><input type="text" name="result.1" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="data.2" value="2" /></td>
+			<td><input type="text" name="formula.2" value="sample_indexed_name#data.{N} * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected.2" value="660" /></td>
+			<td><input type="button" value="execute" onclick="exec(2, 'sample_indexed_name')" /></td>
+			<td><input type="text" name="result.2" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="data.3" value="3" /></td>
+			<td><input type="text" name="formula.3" value="sample_indexed_name#data.{N} * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected.3" value="990" /></td>
+			<td><input type="button" value="execute" onclick="exec(3, 'sample_indexed_name')" /></td>
+			<td><input type="text" name="result.3" value="" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="data.4" value="4" /></td>
+			<td><input type="text" name="formula.4" value="sample_indexed_name#data.{N} * 10000 * 3.3%" /></td>
+			<td><input type="text" name="expected.4" value="1320" /></td>
+			<td><input type="button" value="execute" onclick="exec(4, 'sample_indexed_name')" /></td>
+			<td><input type="text" name="result.4" value="" /></td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>
