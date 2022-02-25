@@ -8,7 +8,7 @@
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/date_parser
+https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.0
 
 ### 1.3. 호환성
 
