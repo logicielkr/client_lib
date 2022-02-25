@@ -10,7 +10,7 @@ Javascript 로 Microsoft Excel 이나 LibreOffice(Openoffice) Calc 에서 제공
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/formula
+https://github.com/logicielkr/client_lib/tree/master/formula/0.5.0.0
 
 ### 1.3. 호환성
 
