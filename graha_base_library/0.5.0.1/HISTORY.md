@@ -1,4 +1,4 @@
-# History of graha base library
+# History of Graha Base Library
 
 ## 1. 0.5
 
