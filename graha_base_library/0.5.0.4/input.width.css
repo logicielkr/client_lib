@@ -5,7 +5,7 @@ table.graha input[type='text'], table.graha select, table.graha textarea {
 	box-sizing: border-box;
 }
 table.graha input[type='text'] {
-	width:calc(100% - 15px);
+	width:calc(100% - 10px);
 	width: fill-available;
 	width: -moz-fill-available;
 /*	width: -webkit-fill-available;	*/
