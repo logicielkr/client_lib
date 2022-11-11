@@ -1,16 +1,20 @@
-table.graha input[type='text'], table.graha select, table.graha textarea {
+table.graha input[type='text'],
+table.graha input[type='password'],
+table.graha select,
+table.graha textarea {
 	width:100%;
-}
-table.graha input[type='text'] {
-	width:calc(100% - 10px);
-	width: fill-available;
-	width: -moz-fill-available;
-/*	width: -webkit-fill-available;	*/
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 }
 table.graha textarea {
 	height:300px;
 }
-select, input[type='text'], input[type='submit'], input[type='button'], button {
+select,
+input[type='text'],
+input[type='password'],
+input[type='submit'],
+input[type='button'], button {
 	font-size:18px;
 	vertical-align: middle;
 }
