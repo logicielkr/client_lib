@@ -1,8 +1,5 @@
 table.graha input[type='text'], table.graha select, table.graha textarea {
 	width:100%;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
 }
 table.graha input[type='text'] {
 	width:calc(100% - 10px);
