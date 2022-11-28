@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+<meta charset="utf-8" />
+<title>Lang.js Test Page</title>
+<script src="Lang.js"></script>
+<script>
+function guess(obj) {
+	if(obj.name.indexOf(".") > 0) {
+		var lang = Lang.guess(obj.value);
+		var index = obj.name.substring(obj.name.indexOf("."));
+		var form = document.getElementById("lang");
+		if(lang != null) {
+			form["ko" + index].value = lang.ko;
+			form["jp" + index].value = lang.jp;
+			form["hanja" + index].value = lang.hanja;
+			form["overAscii" + index].value = lang.overAscii;
+			form["overISO_8859_1" + index].value = lang.overISO_8859_1;
+			form["ascii" + index].value = lang.ascii;
+		} else {
+			form["ko" + index].value = "";
+			form["jp" + index].value = "";
+			form["hanja" + index].value = "";
+			form["overAscii" + index].value = "";
+			form["overISO_8859_1" + index].value = "";
+			form["ascii" + index].value = "";
+		}
+	}
+}
+</script>
+</head>
+<body>
+<h3>문자열 입력</h3>
+<form name="lang" id="lang">
+	<table>
+		<tr>
+			<th>입력값</th>
+			<th>한글</th>
+			<th>일본어</th>
+			<th>한자</th>
+			<th>ISO-8859-1 초과</th>
+			<th>ASCII 초과</th>
+			<th>ASCII</th>
+		</tr>
+		<tr>
+			<td><input type="text" name="str.1" value="대한민국" onblur="guess(this)" /></td>
+			<td><input type="text" name="ko.1" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="jp.1" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="hanja.1" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overAscii.1" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overISO_8859_1.1" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="ascii.1" readonly="readonly" disabled="disabled" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="str.2" value="こんにちは" onblur="guess(this)" /></td>
+			<td><input type="text" name="ko.2" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="jp.2" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="hanja.2" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overAscii.2" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overISO_8859_1.2" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="ascii.2" readonly="readonly" disabled="disabled" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="str.3" value="你好" onblur="guess(this)" /></td>
+			<td><input type="text" name="ko.3" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="jp.3" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="hanja.3" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overAscii.3" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overISO_8859_1.3" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="ascii.3" readonly="readonly" disabled="disabled" /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="str.4" value="東京" onblur="guess(this)" /></td>
+			<td><input type="text" name="ko.4" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="jp.4" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="hanja.4" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overAscii.4" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="overISO_8859_1.4" readonly="readonly" disabled="disabled" /></td>
+			<td><input type="text" name="ascii.4" readonly="readonly" disabled="disabled" /></td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>
