@@ -35,6 +35,6 @@
 ### 1.4.	0.5.0.4
 
 - input.width.css 파일을 변경함.
-- "width: -webkit-fill-available;" 를 주석으로 처리함.
-- chrome 및 이를 기반으로 한 edge 에서 "width: -webkit-fill-available;" 가 있으면,
-- input 의 width 를 지정하지 않은 것과 같다.
+- 원하는 것 : input 이 td 에 여백없이 가득 차는 차는 것.
+- box-sizing: border-box; 으로 처리
+- IE11, 최신버전의 Firefox, Google Chrome,  Chromium 기반의 Microsoft Edge 에서 테스트 함.
