@@ -10,6 +10,8 @@ UTF-8 인코딩된 문자열에 한국어, 일본어, 한자, 혹은 ASCII, ISO-
 
 구체적인 상황에 맞게 Lang.onlyKoreanWithAscii 나 Lang.onlyAscii 같은 함수를 만들어서 사용하기를 권한다.
 
+소스를 보면 알겠지만, 그냥 1글자씩 검사한다.
+
 ### 1.2. 다운로드
 
 https://github.com/logicielkr/client_lib/tree/master/lang/0.5.0.0
