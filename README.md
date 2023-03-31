@@ -3,7 +3,7 @@
 ## 1. DateParser.js
 
 - 여러 형식의 날짜를 입력받아, ISO 형식으로 변환하는 Javascript Library
-- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.1
+- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.2
 
 ## 2. GrahaFormula.js
 
