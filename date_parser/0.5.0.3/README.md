@@ -8,7 +8,7 @@
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.0
+https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.3
 
 ### 1.3. 호환성
 
@@ -20,7 +20,7 @@ https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.0
 
 ### 1.4. 중요한 알림
 
-- 0.5.0.0 ~ 0.5.0.2 사이의 버전은 31 일에서 버그가 발견되었다(상세내용은 0.5.0.0의 HISTORY.md 참조).
+- 0.5.0.0 ~ 0.5.0.2 사이의 버전은 31 일에서 버그가 발견되었다(상세내용은 HISTORY.md 참조).
 
 ## 2. DateParser.js 사용법
 
@@ -31,6 +31,8 @@ https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.0
 
 ### 2.2. 입력값과 반환값 (오늘이 2021년 10월 28일 인 경우)
 
+- DateParser.parse("+") : 2021-10-28
+- DateParser.parse("-") : 2021-10-28
 - DateParser.parse("1") : 2021-10-01
 - DateParser.parse("+0") : 2021-10-28
 - DateParser.parse("-1") : 2021-10-27

@@ -18,6 +18,10 @@ https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.1
 - Google Chrome 최신버전
 - Internet Explorer 11
 
+### 1.4. 중요한 알림
+
+- 0.5.0.0 ~ 0.5.0.2 사이의 버전은 31 일에서 버그가 발견되었다(상세내용은 0.5.0.0의 HISTORY.md 참조).
+
 ## 2. DateParser.js 사용법
 
 ### 2.1. DateParser.js 가 제공하는 함수

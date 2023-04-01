@@ -20,7 +20,7 @@ https://github.com/logicielkr/client_lib/tree/master/date_parser/0.5.0.2
 
 ### 1.4. 중요한 알림
 
-- 0.5.0.1 에서 치명적인 버그가 발견되어 0.5.0.2 로 긴급패치하였음(상세내용은 HISTORY.md 참조).
+- 0.5.0.0 ~ 0.5.0.2 사이의 버전은 31 일에서 버그가 발견되었다(상세내용은 0.5.0.0의 HISTORY.md 참조).
 
 ## 2. DateParser.js 사용법
 
