@@ -114,19 +114,19 @@ GrahaReporter.create(
 
 ####			2.4.1. "Buffer.isBuffer is not a function"
 
-GrahaReporter.js 를 호출하기 전에, JSZip 를 호출해서 사용한 경우에 발생할 수 있다.
+GrahaReporter.js 를 호출하기 전에, JSZip 을 먼저 호출해서 사용한 경우에 발생할 수 있다.
 
-JSZip 이 호출되기 전에 다음과 같은 코드가 먼저 호출되도록 수정한다.
+JSZip 이 호출되기 전에 다음과 같은 코드가 호출되어야 한다.
 
 ```javascript
 JSZip.support.nodebuffer = false;
 ```
 
-iconv-lite 을 이용애서 파일이름을 EUC-KR 로 저장하려고 할 때,
+iconv-lite 을 이용해서 파일이름을 EUC-KR 로 저장하려고 할 때,
 JSZip 이 내부적으로 Buffer.isBuffer 함수(웹브라우저에서는 지원하지 않고, Node.js 에서만 지원)를 호출하는데,
-Buffer.isBuffer 를 사용하지 않도록 설정해야 한다.
+Buffer.isBuffer 를 사용하지 않도록 해야 한다.
 
-Windows 7 이하에서는
+Windows 7 이하에서
 zip 파일 내의 파일이름이 (UTF-8이 아니라) EUC-KR 등으로 인코딩되어 있어야 하는데(Windows 10 이상은 UTF-8 지원),
 이를 처리하기 위함이다.
 
