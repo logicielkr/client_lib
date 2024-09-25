@@ -31,7 +31,7 @@
  * https://cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js
  
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.5.0.0
+ * @version 0.5.0.1
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
  * https://github.com/logicielkr/client_lib/tree/master/reporter/0.5.0.0

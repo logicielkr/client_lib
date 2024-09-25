@@ -18,7 +18,7 @@ zip 으로 압축되어 있고,
 
 ###		1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/reporter/0.5.0.0
+https://github.com/logicielkr/client_lib/tree/master/reporter/0.5.0.1
 
 ###		1.3. 호환성
 
