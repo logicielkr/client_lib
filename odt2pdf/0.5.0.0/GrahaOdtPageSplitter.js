@@ -1,3 +1,36 @@
+/*
+ *
+ * Copyright (C) HeonJik, KIM
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
+/**
+ * GrahaOdtPageSplitter
+ * GrahaOdt2HtmlConverter 로 변환한 HTML 을 페이지 별로 분리한다.
+
+ * GrahaOdt2PdfConverter 전체적인 사용법은 README.md 를 참조한다.
+
+ * @author HeonJik, KIM (https://graha.kr)
+ * @version 0.5.0.0
+ * @since 0.5
+ * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
+ * https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.0
+ */
+
 function GrahaOdtPageSplitter() {
 //	this.scale = 0.3;
 	this.scale = 1;
