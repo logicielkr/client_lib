@@ -37,4 +37,4 @@
 ## 6. GrahaOdt2PdfConverter
 
 - GrahaOdt2PdfConverter 는 [Apache OpenOffice](https://www.openoffice.org/) Text 혹은 [LibreOffice](https://www.libreoffice.org/) Text 로 작성한 문서(.odt)를 html 혹은 pdf 로 변환하는 실험적인 라이브러리이다.
-- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.1
+- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.2
