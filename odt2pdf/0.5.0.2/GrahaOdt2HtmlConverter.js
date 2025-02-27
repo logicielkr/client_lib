@@ -769,11 +769,17 @@ GrahaOdt2HtmlConverter.prototype.footer = function(node) {
 		if(node.nodeName == "style:header") {
 			element.setAttribute("class", "graha_header");
 			this.wrapper.prepend(element);
-			this.pageHeader = element;
+			if(this.pageHeader && this.pageHeader != null) {
+			} else {
+				this.pageHeader = element;
+			}
 		} else if(node.nodeName == "style:footer") {
 			element.setAttribute("class", "graha_footer");
 			this.wrapper.appendChild(element);
-			this.pageFooter = element;
+			if(this.pageFooter && this.pageFooter != null) {
+			} else {
+				this.pageFooter = element;
+			}
 		} else {
 			console.error(node);
 		}
