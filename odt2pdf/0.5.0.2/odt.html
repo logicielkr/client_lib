@@ -119,10 +119,18 @@ function pdf() {
 function displayMenu() {
 	if(converter != null) {
 		$("body").css("background-color", $("div.container").css("background-color"));
-		if(converter.overflow) {
-			$("span#split").show();
+		
+		if(
+			$("div#GrahaOdt2HtmlConverterWrapper div.graha_header").length > 1 ||
+			$("div#GrahaOdt2HtmlConverterWrapper div.graha_footer").length > 1
+		) {
+			alert("지원하는 않는 항목이 있어서, Split 나 PDF 변환 기능을 사용할 수 없습니다.");
+		} else {
+			if(converter.overflow) {
+				$("span#split").show();
+			}
+			$("span#pdf").show();
 		}
-		$("span#pdf").show();
 	}
 }
 function removeDragData(event) {

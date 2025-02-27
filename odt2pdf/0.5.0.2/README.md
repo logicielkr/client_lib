@@ -442,7 +442,10 @@ PDF 로 변환할 때는 다시 ```border-width``` 값을 원래 값으로 되�
 6. styles.xml 과 content.xml 에 style:name 이 동일한 style 이 정의되어 있는 경우가 있는데, 이건 아직 처리하지 못한다(styles.xml 의 ```<office:automatic-styles>``` 에 정의된 것들은 header 와 footer 에서 사용하는 것으로 생각됨).
 7. styles.xml 에 header 나 footer 가 여러 개 정의되어 있는 것이 있던데, 이건 아직 처리하지 못하고, 페이지 분리(GrahaOdtPageSplitter.js) 에서 무한루프에 빠지는 경우도 있다.
 
-	마지막 항목(제7호)은 현재의 GrahaOdt2PdfConverter 의 처리 방식으로는 개선 할 수 없다.
+	마지막 항목(제7호)은
+	경고 메시지를 띄우고, 정상적인 방법으로는 Split 나 PDF 변환 기능을 사용할 수 없도록 odt.html 을 변경했다.
+	
+	이것은 현재의 GrahaOdt2PdfConverter 의 처리 방식으로는 개선이 난해하다고 판단하고 있다.
 	
 	현재의 GrahaOdt2PdfConverter 는 다음과 같이 작업을 3단계로 나누어서 진행하고 있다.
 	
