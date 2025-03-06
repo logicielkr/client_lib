@@ -25,10 +25,10 @@
  * GrahaOdt2PdfConverter 전체적인 사용법은 README.md 를 참조한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.5.0.0
+ * @version 0.5.0.2
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.0
+ * https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.2
  */
 
 function GrahaOdt2HtmlConverter() {
@@ -223,31 +223,10 @@ GrahaOdt2HtmlConverter.prototype.loadXmlFromUrl = function(url) {
 	});
 };
 GrahaOdt2HtmlConverter.prototype.findByTagName = function(node, nodeName) {
-	if(node != null) {
-		if(Node.DOCUMENT_NODE == node.nodeType || Node.ELEMENT_NODE == node.nodeType) {
-			if(node.nodeName == nodeName) {
-				return node;
-			}
-			for(var i = 0; i < node.childNodes.length; i++) {
-				var target = this.findByTagName(node.childNodes[i], nodeName);
-				if(target != null) {
-					return target;
-				}
-			}
-		} else {
-			return null;
-		}
-	}
-	return null;
+	return GrahaOdt2PdfConverterUtility.findByTagName(node, nodeName);
 };
 GrahaOdt2HtmlConverter.prototype.toCSSObject = function(name, value) {
-	return {
-		name: name,
-		value: value
-		, toString: function() {
-			return (this.name + ": " + this.value);
-		}
-	};
+	return GrahaOdt2PdfConverterUtility.toCSSObject(name, value);
 };
 GrahaOdt2HtmlConverter.prototype.toCSSSelector = function(typeSelector, classSelector) {
 	return {
@@ -768,7 +747,7 @@ GrahaOdt2HtmlConverter.prototype.footer = function(node) {
 		}
 		if(node.nodeName == "style:header") {
 			element.setAttribute("class", "graha_header");
-			this.wrapper.prepend(element);
+			$(this.wrapper).prepend(element);
 			if(this.pageHeader && this.pageHeader != null) {
 			} else {
 				this.pageHeader = element;
@@ -1104,6 +1083,16 @@ GrahaOdt2HtmlConverter.prototype.mergeCSSRule = function(rules, font) {
 					rule += rules[i].toString() + ";";
 				}
 			}
+		} else if(rules[i].name && rules[i].name != null && rules[i].name == "page-width") {
+			if(rules[i].value && rules[i].value != null) {
+				rule += "width: " + rules[i].value + ";";
+			}
+		} else if(rules[i].name && rules[i].name != null && rules[i].name == "page-height") {
+			if(rules[i].value && rules[i].value != null) {
+				rule += "height: " + rules[i].value + ";";
+			}
+		} else if(rules[i].name && rules[i].name != null && rules[i].name == "print-orientation") {
+//IGNORE
 		} else {
 			rule += rules[i].toString() + ";";
 		}
@@ -1164,6 +1153,16 @@ GrahaOdt2HtmlConverter.prototype.mergeCSSRuleList = function(ruleList, font) {
 						rule += rules[i].toString() + ";";
 					}
 				}
+			} else if(rules[i].name && rules[i].name != null && rules[i].name == "page-width") {
+				if(rules[i].value && rules[i].value != null) {
+					rule += "width: " + rules[i].value + ";";
+				}
+			} else if(rules[i].name && rules[i].name != null && rules[i].name == "page-height") {
+				if(rules[i].value && rules[i].value != null) {
+					rule += "height: " + rules[i].value + ";";
+				}
+			} else if(rules[i].name && rules[i].name != null && rules[i].name == "print-orientation") {
+//IGNORE
 			} else {
 				rule += rules[i].toString() + ";";
 			}
@@ -1342,17 +1341,6 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			styleNode.appendChild(document.createTextNode(cssStylePageTemplateRule));
 		}
 	}
-/*
-	if(this.adjustScale) {
-		if(this.pageLayout.pageWidth != null) {
-			var pageWidthPxUnit = this.convertToPx(this.pageLayout.pageWidth);
-			if($(document.body).width() < pageWidthPxUnit) {
-				this.scale = $(document.body).width()/pageWidthPxUnit;
-				styleNode.appendChild(document.createTextNode(this.wrapperSelector + " {transform: scale(" + this.scale + ");transform-origin: left top;}"));
-			}
-		}
-	}
-*/
 	return styleNode;
 };
 GrahaOdt2HtmlConverter.prototype.getBody = function() {
@@ -1545,9 +1533,6 @@ GrahaOdt2HtmlConverter.prototype.table = function(node, element) {
 					this.tbody(node.childNodes[i], element);
 				} else if(node.childNodes[i].nodeName == "table:table-rows") {
 					this.tbody(node.childNodes[i], element);
-//					var tbody = document.createElement("tbody");
-//					this.tbody(node.childNodes[i], tbody);
-//					element.appendChild(tbody);
 				} else if(node.childNodes[i].nodeName == "text:soft-page-break") {
 //Nothing
 				} else {
@@ -1696,6 +1681,7 @@ GrahaOdt2HtmlConverter.prototype.draw = function(node, element) {
 						if(attributes.item(x).name == "xlink:type") {
 						} else if(attributes.item(x).name == "xlink:show") {
 						} else if(attributes.item(x).name == "xlink:actuate") {
+						} else if(attributes.item(x).name == "draw:mime-type") {
 						} else if(attributes.item(x).name == "xlink:href") {
 							if(this.zip && this.zip != null) {
 								if(this.promises && this.promises != null) {
@@ -2077,25 +2063,7 @@ GrahaOdt2HtmlConverter.prototype.getMeta = function() {
 		return this.findByTagName(this.meta, "office:meta");
 };
 GrahaOdt2HtmlConverter.prototype.getNodeValue = function(node) {
-	if(node != null && node.childNodes && node.childNodes != null && node.childNodes.length > 0) {
-		var nodeValue = "";
-		for(var i = 0; i < node.childNodes.length; i++) {
-			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
-				var childNodeValue = this.getNodeValue(node.childNodes[i]);
-				if(childNodeValue != null) {
-					nodeValue += childNodeValue;
-				}
-			} else if(Node.TEXT_NODE == node.childNodes[i].nodeType) {
-				if(node.childNodes[i].nodeValue && node.childNodes[i].nodeValue != null) {
-					nodeValue += node.childNodes[i].nodeValue;
-				}
-			} else {
-				console.error(node.childNodes[i]);
-			}
-		}
-		return nodeValue;
-	}
-	return null;
+	return GrahaOdt2PdfConverterUtility.getNodeValue(node);
 };
 GrahaOdt2HtmlConverter.prototype.getPdfProperties = function() {
 	var node = this.getMeta();

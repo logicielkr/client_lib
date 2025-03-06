@@ -690,32 +690,7 @@ GrahaOdt2PdfConverter.prototype.setFonts = function(fonts) {
 	this.fonts = fonts;
 };
 GrahaOdt2PdfConverter.defaultFontFamilyConverter = function(fontFamily, defaultFontFamily) {
-	if(
-		fontFamily.indexOf("굴림") >= 0 ||
-		fontFamily.indexOf("고딕") >= 0 ||
-		fontFamily.indexOf("돋움") >= 0 ||
-		fontFamily.indexOf("Gulim") >= 0 ||
-		fontFamily.indexOf("gulim") >= 0 ||
-		fontFamily.indexOf("Dotum") >= 0 ||
-		fontFamily.indexOf("dotum") >= 0 ||
-		fontFamily.indexOf("Gothic") >= 0 ||
-		fontFamily.indexOf("gothic") >= 0 ||
-		fontFamily.indexOf("Calibri") >= 0
-	) {
-		return "'Nanum Gothic'";
-	} else if(
-		fontFamily.indexOf("바탕") >= 0 ||
-		fontFamily.indexOf("명조") >= 0 ||
-		fontFamily.indexOf("batang") >= 0 ||
-		fontFamily.indexOf("Batang") >= 0 ||
-		fontFamily.indexOf("myeongjo") >= 0 ||
-		fontFamily.indexOf("Myeongjo") >= 0
-	) {
-		return "'Nanum Myeongjo'";
-	} else {
-		console.log(fontFamily);
-		return defaultFontFamily;
-	}
+	return GrahaOdt2PdfConverterUtility.defaultFontFamilyConverter(fontFamily, defaultFontFamily);
 };
 GrahaOdt2PdfConverter.prototype.defaultFonts = function() {
 	var fonts = new Array();

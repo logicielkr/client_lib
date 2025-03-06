@@ -17,3 +17,4 @@
 - 화면의 width 가 페이지의 width 보다 작은 경우 scale을  적용해서 자동으로 축소한다.
 - convertToPx 에 in, m, pt, points, px 추가(종래에는 cm 와 mm 만 구현되어 있었으나, getUnit 에 맞추어 구현)
 - header 나 footer 가 여러 개 정의되어 있는 odt 파일은 Split 과정에서 무한 루프에 빠질 가능성이 있으므로, 경고 메시지 띄우고 Split 나 PDF 변환을 할 수 없도록 변경
+- 기능상의 변화나 버그의 수정없이 일부 함수의 구현을 GrahaOdt2PdfConverterUtility.js 로 이동함(버전을 변경하지 않음)

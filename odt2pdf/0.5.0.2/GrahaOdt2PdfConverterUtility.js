@@ -259,13 +259,16 @@ GrahaOdt2PdfConverterUtility.offsetBottom = function(node, includeMargin, scale)
 	}
 };
 GrahaOdt2PdfConverterUtility.parseInt = function(str, defaultValue) {
-	if(str && str != null) {
+	if(str != null) {
 		return parseInt(str);
 	}
 	return defaultValue;
 };
 GrahaOdt2PdfConverterUtility.parseFloat = function(str, defaultValue) {
-	if(str && str != null) {
+	if(str != null) {
+		if(typeof(str) == "number") {
+			return str;
+		}
 		return parseFloat(str);
 	}
 	return defaultValue;
@@ -280,7 +283,7 @@ GrahaOdt2PdfConverterUtility.getValueStripUnit = function(value, unit) {
 };
 GrahaOdt2PdfConverterUtility.getUnit = function(value) {
 	if(value != null) {
-		var units = ["pt", "points", "mm", "cm", "m", "in", "px"];
+		var units = ["pt", "points", "mm", "cm", "m", "in", "px", "%"];
 		for(var i = 0; i < units.length; i++) {
 			if(value.length == value.lastIndexOf(units[i]) + units[i].length) {
 				return units[i];
@@ -288,6 +291,46 @@ GrahaOdt2PdfConverterUtility.getUnit = function(value) {
 		}
 	}
 	return null;
+};
+GrahaOdt2PdfConverterUtility.convertToPtWithUnit = function(value, unit) {
+	if(unit == "pt") {
+		return value;
+	} else if(unit == "points") {
+		return value;
+	} else if(unit == "mm") {
+		return value * 7.2 / 2.54;
+	} else if(unit == "cm") {
+		return value * 72 / 2.54;
+	} else if(unit == "m") {
+		return value * 720 / 2.54;
+	} else if(unit == "in") {
+		return value * 72;
+	} else if(unit == "px") {
+		return value * 72 / 96;
+	} else {
+		console.error(value);
+		return null;
+	}
+};
+GrahaOdt2PdfConverterUtility.convertToPxWithUnit = function(value, unit) {
+	if(unit == "pt") {
+		return value * 96 / 72;
+	} else if(unit == "points") {
+		return value * 96 / 72;
+	} else if(unit == "mm") {
+		return value * 3.78;
+	} else if(unit == "cm") {
+		return value * 37.8;
+	} else if(unit == "m") {
+		return value * 378;
+	} else if(unit == "in") {
+		return value * 96;
+	} else if(unit == "px") {
+		return value;
+	} else {
+		console.error(value);
+		return null;
+	}
 };
 GrahaOdt2PdfConverterUtility.convertToPx = function(value, defaultValue) {
 	var unit = GrahaOdt2PdfConverterUtility.getUnit(value);
@@ -298,21 +341,81 @@ GrahaOdt2PdfConverterUtility.convertToPx = function(value, defaultValue) {
 	if(value == null) {
 		return defaultValue;
 	}
-	if(unit == "pt") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value) * 96 / 72;
-	} else if(unit == "points") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value) * 96 / 72;
-	} else if(unit == "mm") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value) * 3.78;
-	} else if(unit == "cm") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value) * 37.8;
-	} else if(unit == "m") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value) * 378;
-	} else if(unit == "in") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value) * 96;
-	} else if(unit == "px") {
-		return GrahaOdt2PdfConverterUtility.parseFloat(value);
+	return GrahaOdt2PdfConverterUtility.convertToPxWithUnit(GrahaOdt2PdfConverterUtility.parseFloat(value), unit);
+};
+GrahaOdt2PdfConverterUtility.findByTagName = function(node, nodeName) {
+	if(node != null) {
+		if(Node.DOCUMENT_NODE == node.nodeType || Node.ELEMENT_NODE == node.nodeType) {
+			if(node.nodeName == nodeName) {
+				return node;
+			}
+			for(var i = 0; i < node.childNodes.length; i++) {
+				var target = this.findByTagName(node.childNodes[i], nodeName);
+				if(target != null) {
+					return target;
+				}
+			}
+		} else {
+			return null;
+		}
+	}
+	return null;
+};
+GrahaOdt2PdfConverterUtility.getNodeValue = function(node) {
+	if(node != null && node.childNodes && node.childNodes != null && node.childNodes.length > 0) {
+		var nodeValue = "";
+		for(var i = 0; i < node.childNodes.length; i++) {
+			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
+				var childNodeValue = this.getNodeValue(node.childNodes[i]);
+				if(childNodeValue != null) {
+					nodeValue += childNodeValue;
+				}
+			} else if(Node.TEXT_NODE == node.childNodes[i].nodeType) {
+				if(node.childNodes[i].nodeValue && node.childNodes[i].nodeValue != null) {
+					nodeValue += node.childNodes[i].nodeValue;
+				}
+			} else {
+				console.error(node.childNodes[i]);
+			}
+		}
+		return nodeValue;
+	}
+	return null;
+};
+GrahaOdt2PdfConverterUtility.toCSSObject = function(name, value) {
+	return {
+		name: name,
+		value: value
+		, toString: function() {
+			return (this.name + ": " + this.value);
+		}
+	};
+};
+GrahaOdt2PdfConverterUtility.defaultFontFamilyConverter = function(fontFamily, defaultFontFamily) {
+	if(
+		fontFamily.indexOf("굴림") >= 0 ||
+		fontFamily.indexOf("고딕") >= 0 ||
+		fontFamily.indexOf("돋움") >= 0 ||
+		fontFamily.indexOf("Gulim") >= 0 ||
+		fontFamily.indexOf("gulim") >= 0 ||
+		fontFamily.indexOf("Dotum") >= 0 ||
+		fontFamily.indexOf("dotum") >= 0 ||
+		fontFamily.indexOf("Gothic") >= 0 ||
+		fontFamily.indexOf("gothic") >= 0 ||
+		fontFamily.indexOf("Calibri") >= 0
+	) {
+		return "'Nanum Gothic'";
+	} else if(
+		fontFamily.indexOf("바탕") >= 0 ||
+		fontFamily.indexOf("명조") >= 0 ||
+		fontFamily.indexOf("batang") >= 0 ||
+		fontFamily.indexOf("Batang") >= 0 ||
+		fontFamily.indexOf("myeongjo") >= 0 ||
+		fontFamily.indexOf("Myeongjo") >= 0
+	) {
+		return "'Nanum Myeongjo'";
 	} else {
-		console.error(value);
+		console.log(fontFamily);
+		return defaultFontFamily;
 	}
 };
