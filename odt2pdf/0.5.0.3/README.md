@@ -347,9 +347,9 @@ GrahaOdt2PdfConverter 에는 Firefox 외의 다른 웹브라우저를 위해서
 반대로 너무 작은 값이라면 웹브라우저에 따라 오른 쪽 여백에서 문제가 발생하기도 하는데,
 이와 관련해서 다소간의 버그가 있을 수 있다.
 
-### 3.11. HTML 로 변경한 것을 document.body 에 추가하고 나서 처리되는 것들
+### 3.11. 나중에 처리되는 것들
 
-ODT 파일을 HTML 로 변경한 이후에, 화면에 HTML 을 추가하고 나서 처리되는 것들이 있다.
+ODT 파일을 HTML 로 변경한 후에 처리되는 것들이 있다.
 
 - ```text-justify: inter-character```
 - 문자로 취급되지 않는 이미지나 테이블
@@ -464,6 +464,12 @@ PDF 로 변환할 때는 다시 ```border-width``` 값을 원래 값으로 되�
 
 	- td 안의 것들이 줄바꿈이 달라진다. 
 	- data-anchor-type 이 page 인 것들의 위치가 약간 달라진다.
+	
+	확대(Ctrl++)/축소(Ctrl+-) 를 하면
+	```window.devicePixelRatio``` 가 달라지는데,
+	실제 크기(Ctrl+) 에서 ```window.devicePixelRatio``` 값은 1.25 이다.
+	
+	css 에서 단위를 통합하면 문제가 해결 될 것으로 예상되지만, 처리는 보류하기로 한다.
 
 ### 3.16. IE 11 에서 알려진 버그
 
