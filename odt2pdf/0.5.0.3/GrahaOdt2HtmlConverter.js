@@ -2213,6 +2213,12 @@ GrahaOdt2HtmlConverter.prototype.heightForParent = function(jQueryObject) {
 			} else {
 				var height = this.height(jQueryObject.parent());
 				if(height > 0) {
+					if(jQueryObject.parent() && jQueryObject.parent() != null && jQueryObject.parent().length > 0) {
+						if(jQueryObject.parent()[0].nodeName == "TR") {
+							height -= this.parseInt($(jQueryObject).css("padding-top"));
+							height -= this.parseInt($(jQueryObject).css("padding-bottom"));
+						}
+					}
 					return height;
 				} else {
 					return this.heightForParent(jQueryObject.parent());

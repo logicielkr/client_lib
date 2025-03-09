@@ -164,6 +164,7 @@ function dropHandler(event) {
 		$("div.container").hide();
 		$("span#split").hide();
 		$("span#pdf").hide();
+		window.devicePixelRatio = 1.25;
 		converter.convertFromOdfFile(file, {format: "html", adjustScale: true}).then(function() {
 			displayMenu();
 		}).catch(function() {
@@ -185,6 +186,7 @@ function init() {
 			$("div.container").hide();
 			$("span#split").hide();
 			$("span#pdf").hide();
+			window.devicePixelRatio = 1.25;
 			converter.convertFromOdfFile(file, {format: "html", adjustScale: true}).then(function() {
 				displayMenu();
 			}).catch(function() {
