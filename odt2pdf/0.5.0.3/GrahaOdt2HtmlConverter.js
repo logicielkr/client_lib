@@ -736,12 +736,12 @@ GrahaOdt2HtmlConverter.prototype.footer = function(node) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "text:p") {
 					var paragraph = document.createElement("p");
-					this.paragraph(node.childNodes[i], paragraph);
 					element.appendChild(paragraph);
+					this.paragraph(node.childNodes[i], paragraph);
 				} else if(node.childNodes[i].nodeName == "table:table") {
 					var table = document.createElement("table");
-					this.table(node.childNodes[i], table);
 					element.appendChild(table);
+					this.table(node.childNodes[i], table);
 				} else {
 					console.error(node.childNodes[i]);
 				}
@@ -1420,12 +1420,12 @@ GrahaOdt2HtmlConverter.prototype.td = function(node, element) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "text:p") {
 					var paragraph = document.createElement("p");
-					this.paragraph(node.childNodes[i], paragraph);
 					element.appendChild(paragraph);
+					this.paragraph(node.childNodes[i], paragraph);
 				} else if(node.childNodes[i].nodeName == "table:table") {
 					var table = document.createElement("table");
-					this.table(node.childNodes[i], table);
 					element.appendChild(table);
+					this.table(node.childNodes[i], table);
 				} else {
 					console.error(node.childNodes[i]);
 				}
@@ -1455,8 +1455,8 @@ IE 11 Error
 				} else if(node.childNodes[i].nodeName == "table:table-cell") {
 					var td = document.createElement("td");
 					td.setAttribute("data-table-cell-index", dataTableCellIndex.toString());
-					this.td(node.childNodes[i], td);
 					element.appendChild(td);
+					this.td(node.childNodes[i], td);
 					dataTableCellIndex++;
 				} else {
 					console.error(node.childNodes[i]);
@@ -1499,8 +1499,8 @@ GrahaOdt2HtmlConverter.prototype.tbody = function(node, element) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "table:table-row") {
 					var tr = document.createElement("tr");
-					this.tr(node.childNodes[i], tr);
 					element.appendChild(tr);
+					this.tr(node.childNodes[i], tr);
 				} else if(node.childNodes[i].nodeName == "text:soft-page-break") {
 //Nothing
 				} else {
@@ -1548,15 +1548,15 @@ GrahaOdt2HtmlConverter.prototype.table = function(node, element) {
 				} else if(node.childNodes[i].nodeName == "table:table-columns") {
 				} else if(node.childNodes[i].nodeName == "table:table-row") {
 					var tr = document.createElement("tr");
-					this.tr(node.childNodes[i], tr);
 					element.appendChild(tr);
+					this.tr(node.childNodes[i], tr);
 				} else if(node.childNodes[i].nodeName == "table:table-header-rows") {
 					this.tbody(node.childNodes[i], element);
 				} else if(node.childNodes[i].nodeName == "table:table-rows") {
 					this.tbody(node.childNodes[i], element);
 //					var tbody = document.createElement("tbody");
-//					this.tbody(node.childNodes[i], tbody);
 //					element.appendChild(tbody);
+//					this.tbody(node.childNodes[i], tbody);
 				} else if(node.childNodes[i].nodeName == "text:soft-page-break") {
 //Nothing
 				} else {
@@ -1575,7 +1575,6 @@ GrahaOdt2HtmlConverter.prototype.text = function(node, element) {
 //Nothing
 				} else if(node.childNodes[i].nodeName == "text:p") {
 					var paragraph = document.createElement("p");
-					this.paragraph(node.childNodes[i], paragraph);
 					if(node.childNodes[i].getAttribute("text:style-name") != null) {
 						var preakBefore = this.getWrapperCssRuleValue(this.toCSSSelector("p", node.childNodes[i].getAttribute("text:style-name")).toString(), "-graha-break-before");
 						if(preakBefore != null && preakBefore == "page") {
@@ -1589,18 +1588,19 @@ GrahaOdt2HtmlConverter.prototype.text = function(node, element) {
 						}
 					}
 					element.appendChild(paragraph);
+					this.paragraph(node.childNodes[i], paragraph);
 				} else if(node.childNodes[i].nodeName == "table:table") {
 					var table = document.createElement("table");
-					this.table(node.childNodes[i], table);
 					element.appendChild(table);
+					this.table(node.childNodes[i], table);
 				} else if(node.childNodes[i].nodeName == "text:note-body") {
 					var note = document.createElement("p");
-					this.paragraph(node.childNodes[i], note);
 					element.appendChild(note);
+					this.paragraph(node.childNodes[i], note);
 				} else if(node.childNodes[i].nodeName == "draw:frame") {
 					var div = document.createElement("div");
-					this.draw(node.childNodes[i], div);
 					element.appendChild(div);
+					this.draw(node.childNodes[i], div);
 				} else {
 					console.error(node.childNodes[i]);
 				}
@@ -1617,8 +1617,8 @@ GrahaOdt2HtmlConverter.prototype.span = function(node, element, grahaTextJustify
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "text:span") {
 					var span = document.createElement("span");
-					this.span(node.childNodes[i], span, grahaTextJustify);
 					element.appendChild(span);
+					this.span(node.childNodes[i], span, grahaTextJustify);
 				} else if(node.childNodes[i].nodeName == "text:note") {
 					this.note(node.childNodes[i], element);
 				} else if(node.childNodes[i].nodeName == "text:s") {
@@ -1659,8 +1659,8 @@ GrahaOdt2HtmlConverter.prototype.span = function(node, element, grahaTextJustify
 		if(node.childNodes.length == 0) {
 			var span = document.createElement("span");
 			span.setAttribute("class", "graha_transparent");
-			span.appendChild(document.createTextNode('\u00A0'));
 			element.appendChild(span);
+			span.appendChild(document.createTextNode('\u00A0'));
 		}
 	}
 };
@@ -1909,8 +1909,8 @@ GrahaOdt2HtmlConverter.prototype.note = function(node, element) {
 							span.setAttribute("id", "footnote_" + node.getAttribute("text:id"));
 						}
 						span.setAttribute("class", this.footnote.citationBodyStyleName);
-						span.appendChild(document.createTextNode(note.getAttribute("data-note-citation")));
 						element.appendChild(span);
+						span.appendChild(document.createTextNode(note.getAttribute("data-note-citation")));
 						if(this.footnote.body && this.footnote.body != null) {
 						} else {
 							this.footnote.body = document.createElement("div");
@@ -1999,8 +1999,8 @@ GrahaOdt2HtmlConverter.prototype.rect = function(node, element) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "text:p") {
 					var paragraph = document.createElement("p");
-					this.paragraph(node.childNodes[i], paragraph);
 					element.appendChild(paragraph);
+					this.paragraph(node.childNodes[i], paragraph);
 				} else {
 					console.error(node.childNodes[i]);
 				}
@@ -2023,24 +2023,24 @@ GrahaOdt2HtmlConverter.prototype.paragraph = function(node, parentElement) {
 					this.space(node.childNodes[i], element);
 				} else if(node.childNodes[i].nodeName == "text:span") {
 					var span = document.createElement("span");
-					this.span(node.childNodes[i], span, grahaTextJustify);
 					element.appendChild(span);
+					this.span(node.childNodes[i], span, grahaTextJustify);
 				} else if(node.childNodes[i].nodeName == "draw:frame") {
 					var div = document.createElement("div");
-					this.draw(node.childNodes[i], div);
 					element.appendChild(div);
+					this.draw(node.childNodes[i], div);
 					parentElement.setAttribute("style", "position:relative;");
 				} else if(node.childNodes[i].nodeName == "draw:rect") {
 					var div = document.createElement("div");
-					this.rect(node.childNodes[i], div);
 					element.appendChild(div);
+					this.rect(node.childNodes[i], div);
 				} else if(node.childNodes[i].nodeName == "text:page-number") {
 					var span = document.createElement("span");
 					span.setAttribute("class", "graha-page-number");
+					element.appendChild(span);
 					if(node.childNodes[i].firstChild) {
 						span.appendChild(document.createTextNode(node.childNodes[i].firstChild.nodeValue));
 					}
-					element.appendChild(span);
 				} else if(node.childNodes[i].nodeName == "text:note") {
 					this.note(node.childNodes[i], element);
 				} else if(node.childNodes[i].nodeName == "text:line-break") {
@@ -2076,10 +2076,11 @@ GrahaOdt2HtmlConverter.prototype.paragraph = function(node, parentElement) {
 		if(node.childNodes.length == 0) {
 			var span = document.createElement("span");
 			span.setAttribute("class", "graha_transparent");
-			span.appendChild(document.createTextNode('\u00A0'));
 			element.appendChild(span);
+			span.appendChild(document.createTextNode('\u00A0'));
 		}
 		parentElement.appendChild(element);
+		this.applyParagraphFontSize(parentElement);
 	}
 };
 
@@ -2242,32 +2243,20 @@ GrahaOdt2HtmlConverter.prototype.finalizeTextJustify = function() {
 		}, 10);
 	});
 };
-GrahaOdt2HtmlConverter.prototype.finalizeParagraphFontSize = function() {
-	var _this = this;
-	return new Promise(function(resolve, reject) {
-		window.setTimeout(function() {
-			try {
-				$(_this.wrapperSelector + " p").each(function() {
-					if($(this).parent() && $(this).parent().length > 0) {
-						if($.trim($(this).text()) != "") {
-							if(parseInt($(this).parent().css("font-size")) > parseInt($(this).css("font-size"))) {
-								if(
-									this.childNodes.length > 0 &&
-									this.firstChild.nodeName == "FONT"
-								) {
-									$(this.firstChild).css("font-size", $(this).css("font-size"));
-									$(this).css("font-size", $(this).parent().css("font-size"));
-								}
-							}
-						}
-					}
-				});
-				resolve(true);
-			} catch (error) {
-				reject(error);
+GrahaOdt2HtmlConverter.prototype.applyParagraphFontSize = function(paragraph) {
+	if($(paragraph).parent() && $(paragraph).parent() != null && $(paragraph).parent().length > 0) {
+		if($.trim($(paragraph).text()) != "") {
+			if(this.parseInt($(paragraph).parent().css("font-size")) > this.parseInt($(paragraph).css("font-size"))) {
+				if(
+					paragraph.childNodes.length > 0 &&
+					paragraph.firstChild.nodeName == "FONT"
+				) {
+					$(paragraph.firstChild).css("font-size", $(paragraph).css("font-size"));
+					$(paragraph).css("font-size", $(paragraph).parent().css("font-size"));
+				}
 			}
-		}, 100);
-	});
+		}
+	}
 };
 GrahaOdt2HtmlConverter.prototype.finalizeDrawFrameHeight = function() {
 	var _this = this;
@@ -2529,13 +2518,11 @@ GrahaOdt2HtmlConverter.prototype.finalizeHtml = function(htmlElement, pdfPropert
 	var _this = this;
 	return new Promise(function(resolve, reject) {
 		_this.finalizeTextJustify().then(function() {
-			_this.finalizeParagraphFontSize().then(function() {
-				_this.finalizeDrawFrameHeight().then(function() {
-					_this.finalizeCollapseTableBorder().then(function() {
-						_this.finalizeDrawFrames().then(function() {
-							_this.finalizeWrapperHeight(htmlElement).then(function() {
-								resolve(true);
-							}).catch(function(error) {reject(error);});
+			_this.finalizeDrawFrameHeight().then(function() {
+				_this.finalizeCollapseTableBorder().then(function() {
+					_this.finalizeDrawFrames().then(function() {
+						_this.finalizeWrapperHeight(htmlElement).then(function() {
+							resolve(true);
 						}).catch(function(error) {reject(error);});
 					}).catch(function(error) {reject(error);});
 				}).catch(function(error) {reject(error);});
