@@ -82,7 +82,8 @@ div.container {
 	background-color:rgb(212, 212, 215);
 }
 span#split,
-span#pdf
+span#pdf,
+span#print
 {
 	display:none;
 }
@@ -123,6 +124,13 @@ function split() {
 		converter.split();
 	}
 }
+function printer() {
+	if(window.document.documentMode) {
+		alert("IE 11 에서는 인쇄기능을 지원하지 않습니다.  PDF로 변환한 후에 인쇄해 주세요.");
+	} else {
+		window.print();
+	}
+}
 function pdf() {
 	if(converter != null) {
 		converter.pdf();
@@ -142,6 +150,7 @@ function displayMenu() {
 				$("span#split").show();
 			}
 			$("span#pdf").show();
+			$("span#print").show();
 		}
 	}
 }
@@ -248,13 +257,18 @@ window.addEventListener("afterprint", function(event) {
 	$("p.graha-dummy-bottom").last().css("border-bottom", "none");
 });
 </script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.min.css" />
 </head>
 <body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
 <div id="menu_wrapper">
 <div id="menu_items">
 <input type="file" id="file" style="display:none;" />
-<span id="split"><a href="javascript:void(0)" onclick="split()">Split</a></span>
-<span id="pdf"><a href="javascript:void(0)" onclick="pdf()">PDF</a></span>
+<span id="split" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="split()">splitscreen</span>
+<span id="pdf" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="pdf()">picture_as_pdf</span>
+<span id="print" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="printer()">print</span>
+<!--
+<span class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;">download</span>
+-->
 </div>
 </div>
 <div class="container"></div>
