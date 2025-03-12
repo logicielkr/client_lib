@@ -174,3 +174,62 @@ GrahaOdtPageSplitterUtility.findNthTdChild = function(node, tableCellIndex) {
 	}
 	return null;
 };
+GrahaOdtPageSplitterUtility.prevNodeForOffset = function(node) {
+	if(node && node != null && node.length > 0) {
+		var prev = node.prev();
+		if(prev && prev != null && prev.length > 0) {
+			if(node[0].nodeName == "TD") {
+			} else {
+				return prev;
+			}
+		}
+		if(node[0].nodeName == "P") {
+			var parent = node.parent();
+			if(parent && parent != null && parent.length > 0) {
+				if(parent[0].nodeName == "TD") {
+					return GrahaOdtPageSplitterUtility.prevNodeForOffset(parent);
+				}
+			}
+		} else if(node[0].nodeName == "TD" || node[0].nodeName == "TH") {
+			var parent = node.parent();
+			if(parent && parent != null && parent.length > 0) {
+				if(parent[0].nodeName == "TR") {
+					return GrahaOdtPageSplitterUtility.prevNodeForOffset(parent);
+				}
+			}
+		} else if(node[0].nodeName == "TR") {
+			var parent = node.parent();
+			if(parent && parent != null && parent.length > 0) {
+				if(parent[0].nodeName == "TABLE" || parent[0].nodeName == "TBODY" || parent[0].nodeName == "THEAD" || parent[0].nodeName == "TFOOT") {
+					return GrahaOdtPageSplitterUtility.prevNodeForOffset(parent);
+				}
+			}
+		} else if(node[0].nodeName == "TBODY" || node[0].nodeName == "THEAD" || node[0].nodeName == "TFOOT") {
+			var parent = node.parent();
+			if(parent && parent != null && parent.length > 0) {
+				if(parent[0].nodeName == "TABLE") {
+					return GrahaOdtPageSplitterUtility.prevNodeForOffset(parent);
+				}
+			}
+//		} else if(node[0].nodeName == "TABLE") {
+		}
+	}
+	return null;
+};
+GrahaOdtPageSplitterUtility.parentNode = function(node, parentNodeName) {
+	if(node == null) {
+		return null;
+	}
+	if(node.nodeName == parentNodeName) {
+		return node;
+	}
+	var parent = $(node).parent();
+	if(parent && parent != null && parent.length > 0) {
+		if(parent[0].nodeName == parentNodeName) {
+			return parent[0];
+		} else {
+			return GrahaOdtPageSplitterUtility.parentNode(parent[0], parentNodeName);
+		}
+	}
+	return null;
+};

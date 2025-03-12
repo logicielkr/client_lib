@@ -34,7 +34,8 @@
 
 <style>
 @page {
-	margin:0;
+	margin: 0px;
+	padding: 0px;
 }
 body {
 	margin-left: 0px;
@@ -43,7 +44,9 @@ body {
 	margin-bottom: 10px;
 	padding: 0px;
 }
-div#GrahaOdt2HtmlConverterWrapper {
+div#GrahaOdt2HtmlConverterWrapper,
+div#GrahaOdt2HtmlConverterScaleWrapper
+{
 	margin-left: auto;
 	margin-right: auto;
 	background-color: white;
@@ -89,19 +92,27 @@ span#pdf
 		margin-top: 0px;
 		margin-bottom: 0px;
 		padding: 0px;
-		background-color:gray;
-		height:0px;
+		height: 0px;
 	}
 	div#menu_wrapper {
-		display:none !important;
+		display: none !important;
 	}
 	div#menu_items {
-		display:none !important;
+		display: none !important;
 	}
-	div#GrahaOdt2HtmlConverterWrapper {
+	div.container {
+		display: none !important;
+	}
+	div#GrahaOdt2HtmlConverterWrapper,
+	div#GrahaOdt2HtmlConverterScaleWrapper
+	{
 		position: absolute;
-		top: 0;
-		background-color:gray;
+		top: 0px;
+		margin: 0px;
+		padding: 0px;
+	}
+	p.graha_page {
+		overflow: hidden;
 	}
 }
 </style>
@@ -221,6 +232,20 @@ $(window).on("load", function() {
 	} else {
 		IEReady();
 	}
+});
+</script>
+<script>
+window.addEventListener("beforeprint", function(event) {
+	if(converter != null) {
+		if(converter.overflow) {
+			converter.split();
+		}
+		$("p.graha-dummy-bottom").css("border-bottom", "none");
+	}
+});
+window.addEventListener("afterprint", function(event) {
+	$("p.graha-dummy-bottom").css("border-bottom", "gray 1px dashed");
+	$("p.graha-dummy-bottom").last().css("border-bottom", "none");
 });
 </script>
 </head>

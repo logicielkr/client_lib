@@ -134,9 +134,6 @@ GrahaOdtTableBorderCollapser.prototype.td = function(node, rowIndex, colCount) {
 	if(colIndex == 1) {
 		this.copyBorder(this.tableElement, node, "left", "left");
 	}
-	if(window.document.documentMode) {
-		this.applyBorderMininumWidth(node);
-	}
 	if(this.validBorderStyle(node, "right")) {
 		var rightCellIndex = colIndex;
 		if(node.getAttribute("colspan") != null) {
@@ -298,6 +295,9 @@ GrahaOdtTableBorderCollapser.prototype.td = function(node, rowIndex, colCount) {
 		} else {
 			console.error(node);
 		}
+	}
+	if(window.document.documentMode) {
+		this.applyBorderMininumWidth(node);
 	}
 };
 GrahaOdtTableBorderCollapser.prototype.tr = function(node, rowIndex, colCount) {

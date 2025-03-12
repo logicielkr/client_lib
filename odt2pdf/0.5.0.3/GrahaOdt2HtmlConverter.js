@@ -1287,10 +1287,8 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			var cssStyleRule = root + " {\n";
 			for(var i = 0; i < masterPageRule.rule.length; i++) {
 				if(masterPageRule.rule[i].name == "page-width") {
-					cssStyleRule += "\twidth: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.pageWidth = masterPageRule.rule[i].value;
 				} else if(masterPageRule.rule[i].name == "page-height") {
-					cssStyleRule += "\theight: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.pageHeight = masterPageRule.rule[i].value;
 				} else if(masterPageRule.rule[i].name == "print-orientation") {
 					this.pageLayout.pageOrientation = masterPageRule.rule[i].value;
@@ -1308,6 +1306,13 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 					cssStyleRule += "\tpadding-right: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.marginRight = masterPageRule.rule[i].value;
 				}
+			}
+			if(this.pageLayout.pageOrientation == "portrait") {
+				cssStyleRule += "\twidth: " + this.pageLayout.pageWidth + ";\n";
+				cssStyleRule += "\theight: " + this.pageLayout.pageHeight + ";\n";
+			} else {
+				cssStyleRule += "\theight: " + this.pageLayout.pageWidth + ";\n";
+				cssStyleRule += "\twidth: " + this.pageLayout.pageHeight + ";\n";
 			}
 			cssStyleRule += "\tbox-sizing: border-box;\n";
 			if(this.defaultFontFamily && this.defaultFontFamily != null) {
@@ -1327,6 +1332,11 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			cssStylePageTemplateRule += "\tmargin: 0;\n";
 			cssStylePageTemplateRule += "\tpadding: 0;\n";
 			if(this.pageLayout.pageWidth != null) {
+				if(this.pageLayout.pageOrientation == "portrait") { 
+					styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageWidth + " " + this.pageLayout.pageHeight + ";}\n"));
+				} else {
+					styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageHeight + " " + this.pageLayout.pageWidth + ";}\n"));
+				}
 				var unit = this.getUnit(this.pageLayout.pageWidth);
 				if(unit != null) {
 					var pageWidth = this.parseFloat(this.getValueStripUnit(this.pageLayout.pageWidth, unit), 0);

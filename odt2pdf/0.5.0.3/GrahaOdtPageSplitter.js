@@ -37,6 +37,11 @@ function GrahaOdtPageSplitter(options) {
 	} else {
 		this.scale = 1;
 	}
+	if(options && options != null && options.pageLayout && options.pageLayout != null) {
+		this.pageLayout = options.pageLayout;
+	} else {
+		this.pageLayout = null;
+	}
 	this.availableMode = "page";
 }
 GrahaOdtPageSplitter.prototype.parseInt = function(str, defaultValue) {
@@ -155,46 +160,7 @@ GrahaOdtPageSplitter.prototype.footNoteHeight = function(node) {
 	return footNoteHeight;
 };
 GrahaOdtPageSplitter.prototype.prevNodeForOffset = function(node) {
-	if(node && node != null && node.length > 0) {
-		var prev = node.prev();
-		if(prev && prev != null && prev.length > 0) {
-			if(node[0].nodeName == "TD") {
-			} else {
-				return prev;
-			}
-		}
-		if(node[0].nodeName == "P") {
-			var parent = node.parent();
-			if(parent && parent != null && parent.length > 0) {
-				if(parent[0].nodeName == "TD") {
-					return this.prevNodeForOffset(parent);
-				}
-			}
-		} else if(node[0].nodeName == "TD" || node[0].nodeName == "TH") {
-			var parent = node.parent();
-			if(parent && parent != null && parent.length > 0) {
-				if(parent[0].nodeName == "TR") {
-					return this.prevNodeForOffset(parent);
-				}
-			}
-		} else if(node[0].nodeName == "TR") {
-			var parent = node.parent();
-			if(parent && parent != null && parent.length > 0) {
-				if(parent[0].nodeName == "TABLE" || parent[0].nodeName == "TBODY" || parent[0].nodeName == "THEAD" || parent[0].nodeName == "TFOOT") {
-					return this.prevNodeForOffset(parent);
-				}
-			}
-		} else if(node[0].nodeName == "TBODY" || node[0].nodeName == "THEAD" || node[0].nodeName == "TFOOT") {
-			var parent = node.parent();
-			if(parent && parent != null && parent.length > 0) {
-				if(parent[0].nodeName == "TABLE") {
-					return this.prevNodeForOffset(parent);
-				}
-			}
-//		} else if(node[0].nodeName == "TABLE") {
-		}
-	}
-	return null;
+	return GrahaOdtPageSplitterUtility.prevNodeForOffset(node);
 };
 GrahaOdtPageSplitter.prototype.footNotePrevHeight = function(node) {
 	if(node && node != null) {
@@ -367,15 +333,23 @@ GrahaOdtPageSplitter.prototype.addPage = function() {
 	var bottom = document.createElement("p");
 	bottom.setAttribute("class", "graha-dummy-bottom");
 	bottom.setAttribute("data-graha-page-number", this.lastPageNumber);
-	$(bottom).css("height", $(this.wrapperSelector).css("padding-bottom"));
-	$(bottom).css("border-bottom", "gray 1px dashed");
 	$(bottom).css("box-sizing", "border-box");
+	if(this.pageLayout && this.pageLayout != null && this.pageLayout.marginBottom && this.pageLayout.marginBottom != null) {
+		$(bottom).css("height", this.pageLayout.marginBottom);
+	} else {
+		$(bottom).css("height", $(this.wrapperSelector).css("padding-bottom"));
+	}
+	$(bottom).css("border-bottom", "gray 1px dashed");
 	$(this.wrapperSelector).append(bottom);
 	
 	var top = document.createElement("p");
 	top.setAttribute("data-graha-page-number", (this.lastPageNumber + 1));
 	top.setAttribute("class", "graha-dummy-top");
-	$(top).css("height", $(this.wrapperSelector).css("padding-top"));
+	if(this.pageLayout && this.pageLayout != null && this.pageLayout.marginTop && this.pageLayout.marginTop != null) {
+		$(top).css("height", this.pageLayout.marginTop);
+	} else {
+		$(top).css("height", $(this.wrapperSelector).css("padding-top"));
+	}
 	$(top).css("box-sizing", "border-box");
 	$(this.wrapperSelector).append(top);
 };
@@ -513,7 +487,7 @@ GrahaOdtPageSplitter.prototype.paragraph = function(node) {
 		}
 	}
 };
-GrahaOdtPageSplitter.prototype.span = function(node, splitter, root) {
+GrahaOdtPageSplitter.prototype.span = function(node, splitter) {
 	if(node == null) {
 		return;
 	}
@@ -530,7 +504,7 @@ GrahaOdtPageSplitter.prototype.span = function(node, splitter, root) {
 			if(node.childNodes[i].nodeName == "SPAN") {
 				splitter.parentB = spanB;
 				splitter.parentA = spanA;
-				this.span(node.childNodes[i], splitter, node);
+				this.span(node.childNodes[i], splitter);
 			} else {
 				console.error(node.childNodes[i]);
 			}
@@ -567,6 +541,9 @@ GrahaOdtPageSplitter.prototype.span = function(node, splitter, root) {
 		}
 	}
 };
+GrahaOdtPageSplitter.prototype.parentNode = function(node, parentNodeName) {
+	return GrahaOdtPageSplitterUtility.parentNode(node, parentNodeName)
+};
 GrahaOdtPageSplitter.prototype.font = function(node, paragraph) {
 	if(node == null) {
 		return null;
@@ -588,7 +565,7 @@ GrahaOdtPageSplitter.prototype.font = function(node, paragraph) {
 				splitter.parentA = fontA;
 				this.span(node.childNodes[i], splitter, node);
 				if(fontA == null && splitter.after != null && splitter.parentA != null) {
-					fontA = splitter.parentA;
+					fontA = this.parentNode(splitter.parentA, "FONT");
 				}
 			} else {
 				console.error(node.childNodes[i]);

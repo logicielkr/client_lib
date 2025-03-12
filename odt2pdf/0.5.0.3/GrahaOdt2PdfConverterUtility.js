@@ -78,13 +78,23 @@ GrahaOdt2PdfConverterUtility.outerHeightWithoutMargin = function(node, scale) {
 GrahaOdt2PdfConverterUtility.outerHeight = function(node, includeMargin, scale) {
 	if(node instanceof jQuery) {
 		if(arguments.length > 1 && includeMargin) {
-			return node.outerHeight(true);
+			var marginBottom = GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-bottom"), 0);
+			if(marginBottom < 0) {
+				return node.outerHeight(true) + marginBottom;
+			} else {
+				return node.outerHeight(true);
+			}
 		} else {
 			return node.outerHeight(false);
 		}
 	} else {
 		if(arguments.length > 1 && includeMargin) {
-			return $(node).outerHeight(true);
+			var marginBottom = GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-bottom"), 0);
+			if(marginBottom < 0) {
+				return $(node).outerHeight(true) + marginBottom;
+			} else {
+				return $(node).outerHeight(true);
+			}
 		} else {
 			return $(node).outerHeight(false);
 		}
@@ -120,13 +130,13 @@ GrahaOdt2PdfConverterUtility.positionRightWithoutMargin = function(node, scale) 
 GrahaOdt2PdfConverterUtility.positionRight = function(node, includeMargin, scale) {
 	if(node instanceof jQuery) {
 		if(arguments.length > 1 && includeMargin) {
-			return node.position().left/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-left"), 0) +  + node.outerWidth(true);
+			return node.position().left/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-left"), 0) + node.outerWidth(true);
 		} else {
 			return node.position().left/scale + node.outerWidth();
 		}
 	} else {
 		if(arguments.length > 1 && includeMargin) {
-			return $(node).position().left/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-left"), 0) +  + $(node).outerWidth(true);
+			return $(node).position().left/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-left"), 0) + $(node).outerWidth(true);
 		} else {
 			return $(node).position().left/scale + $(node).outerWidth();
 		}
@@ -162,13 +172,13 @@ GrahaOdt2PdfConverterUtility.positionBottomWithoutMargin = function(node, scale)
 GrahaOdt2PdfConverterUtility.positionBottom = function(node, includeMargin, scale) {
 	if(node instanceof jQuery) {
 		if(arguments.length > 1 && includeMargin) {
-			return node.position().top/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-top"), 0) +  + node.outerHeight(true);
+			return node.position().top/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-top"), 0) + node.outerHeight(true);
 		} else {
 			return node.position().top/scale + node.outerHeight();
 		}
 	} else {
 		if(arguments.length > 1 && includeMargin) {
-			return $(node).position().top/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-top"), 0) +  + $(node).outerHeight(true);
+			return $(node).position().top/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-top"), 0) + $(node).outerHeight(true);
 		} else {
 			return $(node).position().top/scale + $(node).outerHeight();
 		}
@@ -204,13 +214,13 @@ GrahaOdt2PdfConverterUtility.offsetRightWithoutMargin = function(node, scale) {
 GrahaOdt2PdfConverterUtility.offsetRight = function(node, includeMargin, scale) {
 	if(node instanceof jQuery) {
 		if(arguments.length > 1 && includeMargin) {
-			return node.offset().left/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-left"), 0) +  + node.outerWidth(true);
+			return node.offset().left/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-left"), 0) + node.outerWidth(true);
 		} else {
 			return node.offset().left/scale + node.outerWidth();
 		}
 	} else {
 		if(arguments.length > 1 && includeMargin) {
-			return $(node).offset().left/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-left"), 0) +  + $(node).outerWidth(true);
+			return $(node).offset().left/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-left"), 0) + $(node).outerWidth(true);
 		} else {
 			return $(node).offset().left/scale + $(node).outerWidth();
 		}
@@ -246,13 +256,13 @@ GrahaOdt2PdfConverterUtility.offsetBottomWithoutMargin = function(node, scale) {
 GrahaOdt2PdfConverterUtility.offsetBottom = function(node, includeMargin, scale) {
 	if(node instanceof jQuery) {
 		if(arguments.length > 1 && includeMargin) {
-			return node.offset().top/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-top"), 0) +  + node.outerHeight(true);
+			return node.offset().top/scale - GrahaOdt2PdfConverterUtility.parseFloat(node.css("margin-top"), 0) + GrahaOdt2PdfConverterUtility.outerHeight(node, includeMargin, scale);
 		} else {
 			return node.offset().top/scale + node.outerHeight();
 		}
 	} else {
 		if(arguments.length > 1 && includeMargin) {
-			return $(node).offset().top/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-top"), 0) +  + $(node).outerHeight(true);
+			return $(node).offset().top/scale - GrahaOdt2PdfConverterUtility.parseFloat($(node).css("margin-top"), 0) + GrahaOdt2PdfConverterUtility.outerHeight(node, includeMargin, scale);
 		} else {
 			return $(node).offset().top/scale + $(node).outerHeight();
 		}

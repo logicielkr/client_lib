@@ -319,7 +319,7 @@ GrahaOdt2PdfConverter.prototype.setOutputFileName = function(fileName) {
 };
 GrahaOdt2PdfConverter.prototype.split = function() {
 	if(this.currentFormat == "html") {
-		var splitter = new GrahaOdtPageSplitter({scale: this.scale});
+		var splitter = new GrahaOdtPageSplitter({scale: this.scale, pageLayout: this.pageLayout});
 		splitter.split();
 		this.currentFormat = "splitted";
 	}
