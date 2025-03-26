@@ -352,7 +352,7 @@ GrahaOdtTableBorderCollapser.prototype.applyCss = function(node, name, value) {
 			name: name,
 			value: value,
 			log: function() {
-				console.log($(node), name, value);
+				console.log($(this.node), this.name, this.value);
 			}
 		};
 		this.css.push(css);

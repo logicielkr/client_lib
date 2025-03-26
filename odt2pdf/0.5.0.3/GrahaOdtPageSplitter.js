@@ -50,50 +50,6 @@ GrahaOdtPageSplitter.prototype.parseInt = function(str, defaultValue) {
 GrahaOdtPageSplitter.prototype.parseFloat = function(str, defaultValue) {
 	return GrahaOdt2PdfConverterUtility.parseFloat(str, defaultValue);
 };
-/*
-GrahaOdtPageSplitter.prototype.outerWidthWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.outerWidthWithMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.outerWidthWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.outerWidthWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.outerHeightWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.outerHeightWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionLeftWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionLeftWithMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionLeftWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionLeftWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionRightWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionRightWithMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionRightWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionRightWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionTopWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionTopWithMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionTopWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionTopWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.positionBottomWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionBottomWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.offsetLeftWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.offsetLeftWithMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.offsetLeftWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.offsetLeftWithoutMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.offsetRightWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.offsetRightWithMargin(node, this.scale);
-};
-GrahaOdtPageSplitter.prototype.offsetRightWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.offsetRightWithoutMargin(node, this.scale);
-};
-*/
 GrahaOdtPageSplitter.prototype.offsetBottomWithoutMargin = function(node) {
 	return GrahaOdt2PdfConverterUtility.offsetBottomWithoutMargin(node, this.scale);
 };
@@ -542,7 +498,7 @@ GrahaOdtPageSplitter.prototype.span = function(node, splitter) {
 	}
 };
 GrahaOdtPageSplitter.prototype.parentNode = function(node, parentNodeName) {
-	return GrahaOdtPageSplitterUtility.parentNode(node, parentNodeName)
+	return GrahaOdtPageSplitterUtility.parentNode(node, parentNodeName);
 };
 GrahaOdtPageSplitter.prototype.font = function(node, paragraph) {
 	if(node == null) {
@@ -627,9 +583,9 @@ GrahaOdtPageSplitter.prototype.td = function(node) {
 
 	$(before).css("height", 0);
 	var paddingBottom = this.parseFloat($(node).css("padding-bottom"), 0);
-	var borderBottom = this.parseFloat($(node).css("border-bottom"), 0);
+	var borderBottom = this.parseFloat($(node).css("border-bottom-width"), 0);
 	var paddingTop = this.parseFloat($(node).css("padding-top"), 0);
-	var borderTop = this.parseFloat($(node).css("border-top"), 0);
+	var borderTop = this.parseFloat($(node).css("border-top-width"), 0);
 	
 	var bottomExtraHeight = borderBottom + paddingBottom;
 	var topExtraHeight = borderTop + paddingTop;
@@ -675,11 +631,13 @@ GrahaOdtPageSplitter.prototype.td = function(node) {
 			}
 		}
 	}
-	$(node).after(before);
 	var beforeOuterHeight = this.availablePageHeightWithPrevFootNote(node) - nodeOffsetTop;
 	var afterOuterHeight = nodeOuterHeight - beforeOuterHeight;
 	$(node).outerHeight(beforeOuterHeight + bottomExtraHeight);
 	$(before).outerHeight(afterOuterHeight);
+/**
+여기서는 before 변수의 명명법이 정확하지 않다는 사실에 유의한다.
+*/
 	return {
 		before: node,
 		after: before,
@@ -713,95 +671,13 @@ GrahaOdtPageSplitter.prototype.tr = function(node) {
 	};
 };
 GrahaOdtPageSplitter.prototype.rowspan = function(node, before) {
-	var countOfCol = 0;
-	if(node.getAttribute("data-hwpx-column-count") != null) {
-		countOfCol = this.parseInt(node.getAttribute("data-hwpx-column-count"), 0);
-	} else {
-		for(var i = 0; i < before.childNodes.length; i++) {
-			if(Node.DOCUMENT_NODE == before.childNodes[i].nodeType || Node.ELEMENT_NODE == before.childNodes[i].nodeType) {
-				if(before.childNodes[i].nodeName == "COLGROUP") {
-					var colgroup = before.childNodes[i];
-					for(var x = 0; x < colgroup.childNodes.length; x++) {
-						if(Node.DOCUMENT_NODE == colgroup.childNodes[x].nodeType || Node.ELEMENT_NODE == colgroup.childNodes[x].nodeType) {
-							if(colgroup.childNodes[x].nodeName == "COL") {
-								countOfCol++;
-							}
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
-	if(countOfCol == 0) {
-		return null;
-	}
-	var tds = new Array();
-	var tableCellIndex = 1;
-	var lastTableCellIndex = 0;
-	for(var i = 0; i < node.childNodes.length; i++) {
-		if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
-			if(node.childNodes[i].nodeName == "TD") {
-				tableCellIndex = this.parseInt(node.childNodes[i].getAttribute("data-table-cell-index"), 1);
-				if(tableCellIndex > lastTableCellIndex + 1) {
-					for(var x = (lastTableCellIndex + 1); x < tableCellIndex; x++) {
-						tds.push(x);
-					}
-				}
-				lastTableCellIndex = tableCellIndex + this.parseInt(node.childNodes[i].getAttribute("colspan"), 0);
-			}
-		}
-	}
-	if(countOfCol > tableCellIndex) {
-		for(var x = tableCellIndex + 1; x <= countOfCol; x++) {
-			tds.push(x);
-		}
-	}
-	if(tds.length > 0) {
-		return tds;
-	} else {
-		return null;
-	}
+	return GrahaOdtPageSplitterUtility.rowspan(node, before);
 };
 GrahaOdtPageSplitter.prototype.findNthTdChild = function(node, tableCellIndex) {
 	return GrahaOdtPageSplitterUtility.findNthTdChild(node, tableCellIndex);
 };
 GrahaOdtPageSplitter.prototype.splitRowspan = function(node, tds) {
-	if(node == null) {
-		return;
-	}
-	if(tds == null) {
-		return;
-	} else if(tds.length == 0) {
-		return;
-	}
-	
-	for(var x = 0; x < tds.length; x++) {
-		var current = $(node);
-		var td = null;
-		var rowspan = 0;
-		while(td == null && current && current != null && current.length > 0) {
-			td = this.findNthTdChild(current[0], tds[x]);
-			current = current.prev();
-			rowspan++;
-		}
-		if(td != null) {
-			var result = this.td(td);
-			if(result != null) {
-				if(result.before && result.before != null) {
-					$(td).before(result.before);
-					$(result.before).attr("rowspan", (rowspan - 1));
-					$(td).attr("rowspan", this.parseInt(td.getAttribute("rowspan"), 0) - (rowspan - 1));
-				}
-				var afterTd = this.findNthTdChild(node, tds[x] + this.parseInt(td.getAttribute("colspan"), 0));
-				if(afterTd == null) {
-					$(node).append(td);
-				} else {
-					$(afterTd).before(td);
-				}
-			}
-		}
-	}
+	GrahaOdtPageSplitterUtility.splitRowspan(node, tds, this);
 };
 GrahaOdtPageSplitter.prototype.table = function(node) {
 	if(node == null) {

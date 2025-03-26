@@ -30,3 +30,4 @@
 - heightForParent 함수가 td 대신 tr 의 height 를 리턴하는 경우(IE 11 에서만 발생하는 것으로 추정) td 의 padding-top 과 padding-bottom 을 공제하도록 변경(버그 fix 이지만, IE 11 관련이므로, 버전을 변경하지 않음)
 - window.devicePixelRatio 를 1.25 로 고정함(잠재적인 것이므로, 버전을 변경하지 않음)
 - 웹브라우저의 인쇄 (Ctrl + P) 미리보기를 위한 몇 가지 작업
+- 페이지를 분리 하면서 table 의 border 를 복사 할 때 rowspan 이 적용되어 있는 cell 의 border 는 복사하지 못하는 버그 수정

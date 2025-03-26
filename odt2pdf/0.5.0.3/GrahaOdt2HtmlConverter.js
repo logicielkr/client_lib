@@ -55,32 +55,6 @@ GrahaOdt2HtmlConverter.prototype.parseInt = function(str, defaultValue) {
 GrahaOdt2HtmlConverter.prototype.parseFloat = function(str, defaultValue) {
 	return GrahaOdt2PdfConverterUtility.parseFloat(str, defaultValue);
 };
-/*
-GrahaOdt2HtmlConverter.prototype.width = function(node) {
-	return GrahaOdt2PdfConverterUtility.width(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.outerHeightWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.outerHeightWithMargin(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.positionLeftWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionLeftWithMargin(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.positionRightWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionRightWithMargin(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.positionRightWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionRightWithoutMargin(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.positionTopWithMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionTopWithMargin(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.positionBottomWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.positionBottomWithoutMargin(node, this.scale);
-};
-GrahaOdt2HtmlConverter.prototype.offsetBottomWithoutMargin = function(node) {
-	return GrahaOdt2PdfConverterUtility.offsetBottomWithoutMargin(node, this.scale);
-};
-*/
 GrahaOdt2HtmlConverter.prototype.positionBottomWithMargin = function(node) {
 	return GrahaOdt2PdfConverterUtility.positionBottomWithMargin(node, this.scale);
 };
@@ -1564,9 +1538,6 @@ GrahaOdt2HtmlConverter.prototype.table = function(node, element) {
 					this.tbody(node.childNodes[i], element);
 				} else if(node.childNodes[i].nodeName == "table:table-rows") {
 					this.tbody(node.childNodes[i], element);
-//					var tbody = document.createElement("tbody");
-//					element.appendChild(tbody);
-//					this.tbody(node.childNodes[i], tbody);
 				} else if(node.childNodes[i].nodeName == "text:soft-page-break") {
 //Nothing
 				} else {
