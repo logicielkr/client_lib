@@ -39,7 +39,7 @@
 
 function GrahaReporter() {
 }
-GrahaReporter.prepare = function() {
+GrahaReporter.prepareInternal = function() {
 	JSZip.support.nodebuffer = false;
 	GrahaReporter.legacy = false;
 	var userAgent = navigator.userAgent;
@@ -57,10 +57,10 @@ GrahaReporter.prepare = function() {
 	}
 	var d = new Date();
 	GrahaReporter.current = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-}
+};
 GrahaReporter.report = function(obj) {
 	if(obj.data) {
-		GrahaReporter.prepare();
+		GrahaReporter.prepareInternal();
 		GrahaReporter.fileName = obj.fileName;
 		GrahaReporter.entries = obj.entries;
 		if(obj.mimeType) {
@@ -69,7 +69,7 @@ GrahaReporter.report = function(obj) {
 			GrahaReporter.mimeType = null;
 		}
 		for(var i = 0; i < obj.entries.length; i++) {
-			GrahaReporter.process(obj.data, obj.entries[i], i);
+			GrahaReporter.processInternal(obj.data, obj.entries[i], i);
 		}
 	} else if(obj.dataUrl) {
 		if(obj.dataUrl != null) {
@@ -101,7 +101,7 @@ GrahaReporter.report = function(obj) {
 	} else {
 		alert("데이타를 가져올 주소가 누락되었습니다(010).");
 	}
-}
+};
 GrahaReporter.create = function(dataUrl, entries, fileName, mimeType) {
 	var obj = {
 		dataUrl: dataUrl,
@@ -114,8 +114,8 @@ GrahaReporter.create = function(dataUrl, entries, fileName, mimeType) {
 		obj.mimeType = mimeType;
 	}
 	GrahaReporter.report(obj);
-}
-GrahaReporter.process = function(xml, entry, index) {
+};
+GrahaReporter.processInternal = function(xml, entry, index) {
 	JSZipUtils.getBinaryContent(entry.templateUrl, function(err, zipData) {
 		if(err) {
 			alert("원인을 알 수 없는 에러가 발생했습니다(001).");
@@ -144,7 +144,7 @@ GrahaReporter.process = function(xml, entry, index) {
 						file.async("string").then(
 							function success(xslData) {
 								zip.remove(relativePath);
-								var result = GrahaReporter.transform(xml, xslData);
+								var result = GrahaReporter.transformInternal(xml, xslData);
 								if(result != null) {
 									zip.file(
 										relativePath.substring(0, relativePath.length - 5),
@@ -163,7 +163,7 @@ GrahaReporter.process = function(xml, entry, index) {
 										}
 									}
 									if(ends) {
-										GrahaReporter.blob(zip, index, entry.mimeType);
+										GrahaReporter.blobInternal(zip, index, entry.mimeType);
 									}
 								}
 							},
@@ -181,8 +181,8 @@ GrahaReporter.process = function(xml, entry, index) {
 			});
 		});
 	});
-}
-GrahaReporter.zip = function() {
+};
+GrahaReporter.zipInternal = function() {
 	var ends = true;
 	for(var i = 0; i < GrahaReporter.entries.length; i++) {
 		if(!GrahaReporter.entries[i].ends) {
@@ -191,7 +191,7 @@ GrahaReporter.zip = function() {
 	}
 	if(ends) {
 		if(GrahaReporter.entries.length == 1) {
-			GrahaReporter.download(GrahaReporter.entries[0].blob, GrahaReporter.entries[0].fileName, GrahaReporter.entries[0].mimeType);
+			GrahaReporter.downloadInternal(GrahaReporter.entries[0].blob, GrahaReporter.entries[0].fileName, GrahaReporter.entries[0].mimeType);
 		} else {
 			if(GrahaReporter.mimeType) {
 			} else {
@@ -214,29 +214,29 @@ GrahaReporter.zip = function() {
 					},
 					mimeType: GrahaReporter.mimeType
 				}).then(function (blob) {
-					GrahaReporter.download(blob, GrahaReporter.fileName, GrahaReporter.mimeType);
+					GrahaReporter.downloadInternal(blob, GrahaReporter.fileName, GrahaReporter.mimeType);
 				});
 			} else {
 				zip.generateAsync({
 					type : "blob",
 					mimeType: GrahaReporter.mimeType
 				}).then(function (blob) {
-					GrahaReporter.download(blob, GrahaReporter.fileName, GrahaReporter.mimeType);
+					GrahaReporter.downloadInternal(blob, GrahaReporter.fileName, GrahaReporter.mimeType);
 				});
 			}
 		}
 	}
-}
-GrahaReporter.blob = function(zip, index, mimeType) {
+};
+GrahaReporter.blobInternal = function(zip, index, mimeType) {
 	if (JSZip.support.blob) {
 		zip.generateAsync({type : "blob", mimeType: mimeType}).then(function (blob) {
 			GrahaReporter.entries[index].blob = blob;
 			GrahaReporter.entries[index].ends = true;
-			GrahaReporter.zip();
+			GrahaReporter.zipInternal();
 		});
 	}
-}
-GrahaReporter.download = function(blob, fileName, mimeType) {
+};
+GrahaReporter.downloadInternal = function(blob, fileName, mimeType) {
 	if(window.navigator && window.navigator.msSaveOrOpenBlob) {
 		window.navigator.msSaveOrOpenBlob(blob, fileName);
 		return;
@@ -263,8 +263,8 @@ GrahaReporter.download = function(blob, fileName, mimeType) {
 		alert("파일을 다운로드 할 수 없습니다(005).");
 		return;
 	}
-}
-GrahaReporter.transform = function(xml, xslData) {
+};
+GrahaReporter.transformInternal = function(xml, xslData) {
 	if(window.ActiveXObject || "ActiveXObject" in window) {
 		var xsl = null;
 		try {
@@ -300,4 +300,4 @@ GrahaReporter.transform = function(xml, xslData) {
 			throw error;
 		}
 	}
-}
+};
