@@ -25,10 +25,10 @@
  * GrahaOdt2PdfConverter 전체적인 사용법은 README.md 를 참조한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.5.0.4
+ * @version 0.6.0.0
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.4
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.0
  */
 
 function GrahaPdfConverterUtility() {
@@ -41,6 +41,15 @@ GrahaPdfConverterUtility.width = function(node, scale) {
 		return $(node).width();
 	}
 };
+/*
+GrahaPdfConverterUtility.widthWithoutPadding = function(node, scale) {
+	if(node instanceof jQuery) {
+		return node.width() - GrahaPdfConverterUtility.parseFloat(node.css("padding-left"), 0) - GrahaPdfConverterUtility.parseFloat(node.css("padding-right"), 0);
+	} else {
+		return $(node).width() - GrahaPdfConverterUtility.parseFloat($(node).css("padding-left"), 0) - GrahaPdfConverterUtility.parseFloat($(node).css("padding-right"), 0);
+	}
+};
+*/
 GrahaPdfConverterUtility.height = function(node, scale) {
 	if(node instanceof jQuery) {
 		return node.height();
@@ -48,6 +57,29 @@ GrahaPdfConverterUtility.height = function(node, scale) {
 		return $(node).height();
 	}
 };
+GrahaPdfConverterUtility.paddingBottom = function(node, scale) {
+	if(node instanceof jQuery) {
+		return GrahaPdfConverterUtility.parseFloat(node.css("padding-bottom"), 0);
+	} else {
+		return GrahaPdfConverterUtility.parseFloat($(node).css("padding-bottom"), 0);
+	}
+};
+GrahaPdfConverterUtility.paddingTop = function(node, scale) {
+	if(node instanceof jQuery) {
+		return GrahaPdfConverterUtility.parseFloat(node.css("padding-top"), 0);
+	} else {
+		return GrahaPdfConverterUtility.parseFloat($(node).css("padding-top"), 0);
+	}
+};
+/*
+GrahaPdfConverterUtility.heightWithoutPadding = function(node, scale) {
+	if(node instanceof jQuery) {
+		return node.height() - GrahaPdfConverterUtility.parseFloat(node.css("padding-top"), 0) - GrahaPdfConverterUtility.parseFloat(node.css("padding-bottom"), 0);
+	} else {
+		return $(node).height() - GrahaPdfConverterUtility.parseFloat($(node).css("padding-top"), 0) - GrahaPdfConverterUtility.parseFloat($(node).css("padding-bottom"), 0);
+	}
+};
+*/
 GrahaPdfConverterUtility.outerWidthWithMargin = function(node, scale) {
 	return GrahaPdfConverterUtility.outerWidth(node, true, scale);
 };
@@ -268,6 +300,15 @@ GrahaPdfConverterUtility.offsetBottom = function(node, includeMargin, scale) {
 		}
 	}
 };
+GrahaPdfConverterUtility.roundWith = function(value, digit) {
+	return (Math.round(value * Math.pow(10, digit))/Math.pow(10, digit));
+};
+GrahaPdfConverterUtility.floorWith = function(value, digit) {
+	return (Math.floor(value * Math.pow(10, digit))/Math.pow(10, digit));
+};
+GrahaPdfConverterUtility.ceilWith = function(value, digit) {
+	return (Math.ceil(value * Math.pow(10, digit))/Math.pow(10, digit));
+};
 GrahaPdfConverterUtility.parseInt = function(str, defaultValue) {
 	if(str != null) {
 		return parseInt(str);
@@ -295,7 +336,7 @@ GrahaPdfConverterUtility.getUnit = function(value) {
 	if(value != null) {
 		var units = ["pt", "points", "mm", "cm", "m", "in", "px", "%"];
 		for(var i = 0; i < units.length; i++) {
-			if(value.length == value.lastIndexOf(units[i]) + units[i].length) {
+			if(value.lastIndexOf(units[i]) > 0 && value.length == value.lastIndexOf(units[i]) + units[i].length) {
 				return units[i];
 			}
 		}

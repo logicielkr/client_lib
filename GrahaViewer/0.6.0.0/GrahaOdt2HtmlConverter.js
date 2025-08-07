@@ -25,29 +25,23 @@
  * GrahaOdt2PdfConverter 전체적인 사용법은 README.md 를 참조한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.5.0.4
+ * @version 0.6.0.0
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.4
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.0
  */
 
 function GrahaOdt2HtmlConverter() {
 	this.init();
 }
 GrahaOdt2HtmlConverter.prototype.init = function() {
-	this.wrapperId = "GrahaOdt2HtmlConverterWrapper";
-	this.wrapperSelector = "div#" + this.wrapperId;
-	this.grahaEntirePageClassName = "graha_entire_page";
-	this.grahaEntirePageSelector = "p." + this.grahaEntirePageClassName;
-	
 	this.adjustScale = false;
 	this.scaleRatio = 1;
 	
 	this.overflow = false;
 	this.odtBinary = null;
-	
-	this.scaleWrapperId = "GrahaOdt2HtmlConverterScaleWrapper";
-	this.scaleWrapperSelector = "div#" + this.scaleWrapperId;
+
+	this.htmlConverterWrapper = null;
 };
 GrahaOdt2HtmlConverter.prototype.parseInt = function(str, defaultValue) {
 	return GrahaPdfConverterUtility.parseInt(str, defaultValue);
@@ -705,6 +699,16 @@ GrahaOdt2HtmlConverter.prototype.rule = function(node, rule) {
 };
 GrahaOdt2HtmlConverter.prototype.footer = function(node) {
 	if(node != null) {
+		var element = null;
+		if(node.nodeName == "style:header") {
+			element = this.htmlConverterWrapper.createHeaderElement();
+			this.htmlConverterWrapper.appendHeader(element);
+		} else if(node.nodeName == "style:footer") {
+			element = this.htmlConverterWrapper.createFooterElement();
+			this.htmlConverterWrapper.appendFooter(element);
+		} else {
+			console.error(node);
+		}
 		var element = document.createElement("div");
 		for(var i = 0; i < node.childNodes.length; i++) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
@@ -720,23 +724,6 @@ GrahaOdt2HtmlConverter.prototype.footer = function(node) {
 					console.error(node.childNodes[i]);
 				}
 			}
-		}
-		if(node.nodeName == "style:header") {
-			element.setAttribute("class", "graha_header");
-			$(this.wrapper).prepend(element);
-			if(this.pageHeader && this.pageHeader != null) {
-			} else {
-				this.pageHeader = element;
-			}
-		} else if(node.nodeName == "style:footer") {
-			element.setAttribute("class", "graha_footer");
-			this.wrapper.appendChild(element);
-			if(this.pageFooter && this.pageFooter != null) {
-			} else {
-				this.pageFooter = element;
-			}
-		} else {
-			console.error(node);
 		}
 	}
 };
@@ -794,11 +781,11 @@ GrahaOdt2HtmlConverter.prototype.css = function(node, rules) {
 				typeSelector = "hr";
 				classSelector = "graha_footnote_sep";
 			} else if(node.nodeName == "style:header-style") {
-				typeSelector = "div";
-				classSelector = "graha_header";
+				typeSelector = this.htmlConverterWrapper.getHeaderTagName();
+				classSelector = this.htmlConverterWrapper.getHeaderClassName();
 			} else if(node.nodeName == "style:footer-style") {
-				typeSelector = "div";
-				classSelector = "graha_footer";
+				typeSelector = this.htmlConverterWrapper.getFooterTagName();
+				classSelector = this.htmlConverterWrapper.getFooterClassName();
 			} else if(node.getAttribute("style:family") == "graphic") {
 				typeSelector = "div";
 			} else {
@@ -960,10 +947,10 @@ GrahaOdt2HtmlConverter.prototype.getPageRule = function(styles) {
 					rules[i].selector != null &&
 					rules[i].selector.typeSelector &&
 					rules[i].selector.typeSelector != null &&
-					rules[i].selector.typeSelector == "div" &&
+					rules[i].selector.typeSelector == this.htmlConverterWrapper.getHeaderTagName() &&
 					rules[i].selector.classSelector &&
 					rules[i].selector.classSelector != null &&
-					rules[i].selector.classSelector == "graha_header"
+					rules[i].selector.classSelector == this.htmlConverterWrapper.getHeaderClassName()
 				) {
 					grahaHeaderRule = rules[i];
 				} else if(
@@ -972,10 +959,10 @@ GrahaOdt2HtmlConverter.prototype.getPageRule = function(styles) {
 					rules[i].selector != null &&
 					rules[i].selector.typeSelector &&
 					rules[i].selector.typeSelector != null &&
-					rules[i].selector.typeSelector == "div" &&
+					rules[i].selector.typeSelector == this.htmlConverterWrapper.getFooterTagName() &&
 					rules[i].selector.classSelector &&
 					rules[i].selector.classSelector != null &&
-					rules[i].selector.classSelector == "graha_footer"
+					rules[i].selector.classSelector == this.htmlConverterWrapper.getFooterClassName()
 				) {
 					grahaFooterRule = rules[i];
 				}
@@ -1203,15 +1190,17 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 	var styleNode = document.createElement("style");
 	styleNode.type = "text/css";
 	styleNode.setAttribute("type", "text/css");
-	styleNode.appendChild(document.createTextNode(root + " " + this.grahaEntirePageSelector + " {margin: 0; padding: 0; position: relative;}"));
-	styleNode.appendChild(document.createTextNode(root + " p {margin: 0;z-index: 1;}"));
-	styleNode.appendChild(document.createTextNode(root + " td {vertical-align:top;}"));
-	styleNode.appendChild(document.createTextNode(root + " span.graha-text-justify {word-spacing: -3pt;}"));
-	styleNode.appendChild(document.createTextNode(root + " span.graha_transparent {text-decoration: none;}"));
-	styleNode.appendChild(document.createTextNode(root + " div.graha_draw_frame {display: none;position: relative;}"));
-	styleNode.appendChild(document.createTextNode(root + " img.graha_draw_image {position: relative;}"));
-	styleNode.appendChild(document.createTextNode(root + " div.graha_draw_frame_as_table {position: absolute;}"));
-	
+	if(root && root != null) {
+	} else {
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " p {margin: 0;z-index: 1;}"));
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " td {vertical-align:top;}"));
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " span.graha-text-justify {word-spacing: -3pt;}"));
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " span.graha_transparent {text-decoration: none;}"));
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " div.graha_draw_frame {display: none;position: relative;}"));
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " img.graha_draw_image {position: relative;}"));
+		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " div.graha_draw_frame_as_table {position: absolute;}"));
+		return styleNode;
+	}
 	var styles = this.getStyle();
 	if(styles != null) {
 		var rules = new Array();
@@ -1268,16 +1257,12 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 					this.pageLayout.pageOrientation = masterPageRule.rule[i].value;
 //Nothing
 				} else if(masterPageRule.rule[i].name == "margin-top") {
-					cssStyleRule += "\tpadding-top: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.marginTop = masterPageRule.rule[i].value;
 				} else if(masterPageRule.rule[i].name == "margin-bottom") {
-					cssStyleRule += "\tpadding-bottom: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.marginBottom = masterPageRule.rule[i].value;
 				} else if(masterPageRule.rule[i].name == "margin-left") {
-					cssStyleRule += "\tpadding-left: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.marginLeft = masterPageRule.rule[i].value;
 				} else if(masterPageRule.rule[i].name == "margin-right") {
-					cssStyleRule += "\tpadding-right: " + masterPageRule.rule[i].value + ";\n";
 					this.pageLayout.marginRight = masterPageRule.rule[i].value;
 				}
 			}
@@ -1292,20 +1277,41 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			if(this.defaultFontFamily && this.defaultFontFamily != null) {
 				cssStyleRule += "\tfont-family: " + this.defaultFontFamily + ";\n";
 			}
-			cssStyleRule += "\tbackground-color: white;\n";
-/*
-			cssStyleRule += "\tmargin:auto;\n";
-			cssStyleRule += "\tborder:black 1px solid;\n";
-			cssStyleRule += "\tbackground-color:#F3F3F3;\n";
-*/
 			cssStyleRule += "}\n";
 			styleNode.appendChild(document.createTextNode(cssStyleRule));
 			
-			var cssStylePageTemplateRule = root + " p.graha_page {\n";
+			var cssStyleEntirePageRule = this.htmlConverterWrapper.getEntirePageStyleSelector() + " {\n";
+			cssStyleEntirePageRule += "\tbox-sizing: border-box;\n";
+			cssStyleEntirePageRule += "\tmargin: 0;\n";
+			cssStyleEntirePageRule += "\tposition: relative;\n";
+			cssStyleEntirePageRule += "\tbackground-color: white;\n";
+			
+			var cssStyleHeaderRule = this.htmlConverterWrapper.getHeaderStyleSelector() + " {\n";
+			cssStyleHeaderRule += "\tbox-sizing: border-box;\n";
+			cssStyleHeaderRule += "\tposition: relative;\n";
+			
+			var cssStyleGrahaPageHeaderRule = this.htmlConverterWrapper.getPageHeaderStyleSelector() + " {\n";
+			cssStyleGrahaPageHeaderRule += "\tbox-sizing: border-box;\n";
+			
+			var cssStyleFooterRule = this.htmlConverterWrapper.getFooterStyleSelector() + " {\n";
+			cssStyleFooterRule += "\tbox-sizing: border-box;\n";
+			cssStyleFooterRule += "\tposition: relative;\n";
+			
+			var cssStyleGrahaPageFooterRule = this.htmlConverterWrapper.getPageFooterStyleSelector() + " {\n";
+			cssStyleGrahaPageFooterRule += "\tbox-sizing: border-box;\n";
+			
+			var cssStyleFootnoteRule = this.htmlConverterWrapper.getFootNoteStyleSelector() + " {\n";
+			cssStyleFootnoteRule += "\tbox-sizing: border-box;\n";
+			cssStyleFootnoteRule += "\tposition: relative;\n";
+			
+			var cssStyleGrahaPageFootnoteRule = this.htmlConverterWrapper.getPageFootNoteStyleSelector() + " {\n";
+			cssStyleGrahaPageFootnoteRule += "\tbox-sizing: border-box;\n";
+			
+			var cssStylePageTemplateRule = this.htmlConverterWrapper.getPageStyleSelector() + " {\n";
 			cssStylePageTemplateRule += "\tbox-sizing: border-box;\n";
 			cssStylePageTemplateRule += "\tposition: relative;\n";
-			cssStylePageTemplateRule += "\tmargin: 0;\n";
-			cssStylePageTemplateRule += "\tpadding: 0;\n";
+			cssStylePageTemplateRule += "\tmargin-bottom: 10px;\n";
+			cssStylePageTemplateRule += "\tbackground-color: white;\n";
 			if(this.pageLayout.pageWidth != null) {
 				if(this.pageLayout.pageOrientation == "portrait") { 
 					styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageWidth + " " + this.pageLayout.pageHeight + ";}\n"));
@@ -1320,29 +1326,53 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 					var marginBottom = this.parseFloat(this.getValueStripUnit(this.pageLayout.marginBottom, unit), 0);
 					var marginLeft = this.parseFloat(this.getValueStripUnit(this.pageLayout.marginLeft, unit), 0);
 					var marginRight = this.parseFloat(this.getValueStripUnit(this.pageLayout.marginRight, unit), 0);
-					cssStylePageTemplateRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
-					cssStylePageTemplateRule += "\theight: " + (pageHeight - marginTop - marginBottom) + unit + ";\n";
+					cssStylePageTemplateRule += "\twidth: " + pageWidth + unit + ";\n";
+					cssStylePageTemplateRule += "\theight: " + pageHeight + unit + ";\n";
+					cssStylePageTemplateRule += "\tpadding-left: " + marginLeft + unit + ";\n";
+					cssStylePageTemplateRule += "\tpadding-right: " + marginRight + unit + ";\n";
+					cssStylePageTemplateRule += "\tpadding-top: " + marginTop + unit + ";\n";
+					cssStylePageTemplateRule += "\tpadding-bottom: " + marginBottom + unit + ";\n";
+					
+					cssStyleEntirePageRule += "\twidth: " + pageWidth + unit + ";\n";
+					cssStyleEntirePageRule += "\tmin-height: " + pageHeight + unit + ";\n";
+					cssStyleEntirePageRule += "\tpadding-left: " + marginLeft + unit + ";\n";
+					cssStyleEntirePageRule += "\tpadding-right: " + marginRight + unit + ";\n";
+					cssStyleEntirePageRule += "\tpadding-top: " + marginTop + unit + ";\n";
+					cssStyleEntirePageRule += "\tpadding-bottom: " + marginBottom + unit + ";\n";
+					
+					cssStyleHeaderRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
+					cssStyleHeaderRule += "\tleft: " + marginLeft + unit + ";\n";
+					cssStyleGrahaPageHeaderRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
+					cssStyleFooterRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
+					cssStyleFooterRule += "\tleft: " + marginLeft + unit + ";\n";
+					cssStyleGrahaPageFooterRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
+					cssStyleFootnoteRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
+					cssStyleFootnoteRule += "\tleft: " + marginLeft + unit + ";\n";
+					cssStyleGrahaPageFootnoteRule += "\twidth: " + (pageWidth - marginLeft - marginRight) + unit + ";\n";
 				}
 			}
 			cssStylePageTemplateRule += "}\n";
+			cssStyleEntirePageRule += "}\n";
+			cssStyleHeaderRule += "}\n";
+			cssStyleGrahaPageHeaderRule += "}\n";
+			cssStyleFooterRule += "}\n";
+			cssStyleGrahaPageFooterRule += "}\n";
+			cssStyleFootnoteRule += "}\n";
+			cssStyleGrahaPageFootnoteRule += "}\n";
 			styleNode.appendChild(document.createTextNode(cssStylePageTemplateRule));
+			styleNode.appendChild(document.createTextNode(cssStyleEntirePageRule));
+			styleNode.appendChild(document.createTextNode(cssStyleHeaderRule));
+			styleNode.appendChild(document.createTextNode(cssStyleGrahaPageHeaderRule));
+			styleNode.appendChild(document.createTextNode(cssStyleFooterRule));
+			styleNode.appendChild(document.createTextNode(cssStyleGrahaPageFooterRule));
+			styleNode.appendChild(document.createTextNode(cssStyleFootnoteRule));
+			styleNode.appendChild(document.createTextNode(cssStyleGrahaPageFootnoteRule));
 		}
 	}
-/*
-	if(this.adjustScale) {
-		if(this.pageLayout.pageWidth != null) {
-			var pageWidthPxUnit = this.convertToPx(this.pageLayout.pageWidth);
-			if($(document.body).width() < pageWidthPxUnit) {
-				this.scaleRatio = $(document.body).width()/pageWidthPxUnit;
-				styleNode.appendChild(document.createTextNode(this.wrapperSelector + " {transform: scale(" + this.scaleRatio + ");transform-origin: left top;}"));
-			}
-		}
-	}
-*/
 	return styleNode;
 };
 GrahaOdt2HtmlConverter.prototype.getBody = function() {
-		return this.findByTagName(this.content, "office:body");
+	return this.findByTagName(this.content, "office:body");
 };
 GrahaOdt2HtmlConverter.prototype.body = function() {
 	var node = this.getBody();
@@ -1350,41 +1380,18 @@ GrahaOdt2HtmlConverter.prototype.body = function() {
 		for(var i = 0; i < node.childNodes.length; i++) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "office:text") {
-					this.wrapper = document.createElement("div");
-					this.wrapper.setAttribute("id", this.wrapperId);
-					if(this.adjustScale) {
-						var scaleWrapper = document.createElement("div");
-						scaleWrapper.setAttribute("id", this.scaleWrapperId);
-						scaleWrapper.appendChild(this.wrapper);
-						document.body.appendChild(scaleWrapper);
-					} else {
-						document.body.appendChild(this.wrapper);
+					if(this.htmlConverterWrapper == null) {
+						this.htmlConverterWrapper = new GrahaHtmlConverterWrapper(GrahaHtmlConverterWrapper.ODT_FORMAT);
 					}
-					this.styleNode = this.style(this.wrapperSelector);
-					$(this.wrapper).prepend(this.styleNode);
-					var page = document.createElement("p");
-					page.setAttribute("class", this.grahaEntirePageClassName);
-					
-					if(this.pageFooter && this.pageFooter != null) {
-						$(this.pageFooter).before(page);
-					} else {
-						this.wrapper.appendChild(page);
-					}
+					this.htmlConverterWrapper.addFile();
+					this.htmlConverterWrapper.appendStyleForWrapper(this.style());
+					this.styleNode = this.style(this.htmlConverterWrapper.getLastFileWrapperSelector());
+					this.htmlConverterWrapper.appendStyleForLastFileWrapper(this.styleNode);
+					var page = this.htmlConverterWrapper.createEntirePageElement();
+					this.htmlConverterWrapper.addEntirePage(page);
 					this.text(node.childNodes[i], page);
-					if(this.pageFooter && this.pageFooter != null) {
-						if(this.footnote && this.footnote != null) {
-							if(this.footnote.body && this.footnote.body != null) {
-								$(this.pageFooter).before(this.footnote.body);
-							}
-						}
-					} else {
-						if(this.footnote && this.footnote != null) {
-							if(this.footnote.body && this.footnote.body != null) {
-								this.wrapper.appendChild(this.footnote.body);
-							}
-						}
-					}
-					return this.wrapper;
+					this.htmlConverterWrapper.addFootNote(this.footnote);
+					return this.htmlConverterWrapper.getHtmlElement();
 				}
 			}
 		}
@@ -1560,13 +1567,8 @@ GrahaOdt2HtmlConverter.prototype.text = function(node, element) {
 					if(node.childNodes[i].getAttribute("text:style-name") != null) {
 						var preakBefore = this.getWrapperCssRuleValue(this.toCSSSelector("p", node.childNodes[i].getAttribute("text:style-name")).toString(), "-graha-break-before");
 						if(preakBefore != null && preakBefore == "page") {
-							element = document.createElement("p");
-							element.setAttribute("class", this.grahaEntirePageClassName);
-							if(this.pageFooter && this.pageFooter != null) {
-								$(this.pageFooter).before(element);
-							} else {
-								this.wrapper.appendChild(element);
-							}
+							element = this.htmlConverterWrapper.createEntirePageElement();
+							this.htmlConverterWrapper.addEntirePage(element);
 						}
 					}
 					element.appendChild(paragraph);
@@ -1648,7 +1650,7 @@ GrahaOdt2HtmlConverter.prototype.span = function(node, element, grahaTextJustify
 };
 GrahaOdt2HtmlConverter.prototype.getWrapperCssRuleValue = function(selectorText, propertyName) {
 	if(this.styleNode && this.styleNode != null) {
-		var selectorPrefix = this.wrapperSelector + " " + selectorText + " {";
+		var selectorPrefix = this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " " + selectorText + " {";
 		var propertyPrefix = "\t" + propertyName + ": ";
 		for(var i = 0; i < this.styleNode.childNodes.length; i++) {
 			if(Node.TEXT_NODE == this.styleNode.childNodes[i].nodeType) {
@@ -1895,8 +1897,7 @@ GrahaOdt2HtmlConverter.prototype.note = function(node, element) {
 						span.appendChild(document.createTextNode(note.getAttribute("data-note-citation")));
 						if(this.footnote.body && this.footnote.body != null) {
 						} else {
-							this.footnote.body = document.createElement("div");
-							this.footnote.body.setAttribute("class", "graha_footnote");
+							this.footnote.body = this.htmlConverterWrapper.createFootNoteElement();
 							var hr = document.createElement("hr");
 							hr.setAttribute("class", "graha_footnote_sep");
 							this.footnote.body.appendChild(hr);
@@ -2150,9 +2151,9 @@ GrahaOdt2HtmlConverter.prototype.html = function() {
 						resolve({
 							htmlElement: htmlElement,
 							pdfProperties: pdfProperties,
-							wrapperSelector: _this.wrapperSelector,
+							htmlConverterWrapper: _this.htmlConverterWrapper,
 							pageLayout: _this.pageLayout,
-							odtBinary: _this.odtBinary,
+							binary: _this.odtBinary,
 							overflow: _this.overflow,
 							scaleRatio: _this.scaleRatio
 						});
@@ -2169,9 +2170,9 @@ GrahaOdt2HtmlConverter.prototype.html = function() {
 					resolve({
 						htmlElement: htmlElement,
 						pdfProperties: pdfProperties,
-						wrapperSelector: _this.wrapperSelector,
+						htmlConverterWrapper: _this.htmlConverterWrapper,
 						pageLayout: _this.pageLayout,
-						odtBinary: _this.odtBinary,
+						binary: _this.odtBinary,
 						overflow: _this.overflow,
 						scaleRatio: _this.scaleRatio
 					});
@@ -2214,7 +2215,7 @@ GrahaOdt2HtmlConverter.prototype.finalizeTextJustify = function() {
 	return new Promise(function(resolve, reject) {
 		window.setTimeout(function() {
 			try {
-				$(_this.wrapperSelector + " span.graha-text-justify").each(function() {
+				$(_this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " span.graha-text-justify").each(function() {
 					var parent = $(this).parent();
 					while(parent && parent != null && parent.length > 0) {
 						if(parent[0].nodeName == "FONT" || parent[0].nodeName == "P") {
@@ -2251,7 +2252,7 @@ GrahaOdt2HtmlConverter.prototype.finalizeDrawFrameHeight = function() {
 	return new Promise(function(resolve, reject) {
 		window.setTimeout(function() {
 			try {
-				$(_this.wrapperSelector + " div.graha_draw_frame").each(function(){
+				$(_this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " div.graha_draw_frame").each(function(){
 					var height = _this.heightForParent($(this));
 					if(height > 0 && _this.outerWidthWithMargin(this) > height) {
 						$(this).outerHeight(height, true);
@@ -2285,15 +2286,15 @@ GrahaOdt2HtmlConverter.prototype.finalizeDrawFrame = function(index, drawFrame) 
 						
 						top = _this.positionTopWithoutMargin(drawFrame);
 						left = _this.positionLeftWithoutMargin(drawFrame);
-						$(_this.wrapperSelector + " " + _this.grahaEntirePageSelector + " p").each(function(index, item) {
+						$(_this.htmlConverterWrapper.getEntirePageSelector() + " " + _this.htmlConverterWrapper.getEntirePageSelector() + " p").each(function(index, item) {
 							var offsetTop = _this.offsetTopWithMargin(item);
-							offsetTop -= _this.offsetTopWithoutMargin($(_this.wrapperSelector));
+							offsetTop -= _this.offsetTopWithoutMargin($(_this.htmlConverterWrapper.getWrapperSelector()));
 							var offsetBottom = _this.offsetBottomWithMargin(item);;
-							offsetBottom -= _this.offsetTopWithoutMargin($(_this.wrapperSelector));
+							offsetBottom -= _this.offsetTopWithoutMargin($(_this.htmlConverterWrapper.getWrapperSelector()));
 							var offsetLeft = _this.offsetLeftWithMargin(item);
-							offsetLeft -= _this.offsetLeftWithoutMargin($(_this.wrapperSelector));
+							offsetLeft -= _this.offsetLeftWithoutMargin($(_this.htmlConverterWrapper.getWrapperSelector()));
 							var offsetRight = _this.offsetRightWithMargin(item);
-							offsetRight -= _this.offsetLeftWithoutMargin($(_this.wrapperSelector));
+							offsetRight -= _this.offsetLeftWithoutMargin($(_this.htmlConverterWrapper.getWrapperSelector()));
 							if(
 								top >= offsetTop && top <= offsetBottom &&
 								left >= offsetLeft && left <= offsetRight
@@ -2433,7 +2434,7 @@ GrahaOdt2HtmlConverter.prototype.finalizeDrawFrames = function() {
 		window.setTimeout(function() {
 			try {
 				var jobs = new Array();
-				$(_this.wrapperSelector + " div.graha_draw_frame_as_table").add(_this.wrapperSelector + " div.graha_draw_rect").each(function(index, drawFrame) {
+				$(_this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " div.graha_draw_frame_as_table").add(_this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " div.graha_draw_rect").each(function(index, drawFrame) {
 					if(this.getAttribute("data-graha-finalize") != null) {
 						return true;
 					}
@@ -2464,7 +2465,7 @@ GrahaOdt2HtmlConverter.prototype.finalizeWrapperHeight = function(htmlElement) {
 					var outerHeight = _this.offsetBottomWithMargin(htmlElement.lastChild);
 
 					outerHeight += this.parseFloat($(htmlElement).css("padding-bottom"));
-					outerHeight -= _this.offsetTopWithoutMargin($(_this.wrapperSelector));
+					outerHeight -= _this.offsetTopWithoutMargin($(_this.htmlConverterWrapper.getWrapperSelector()));
 					
 					if(outerHeight > _this.outerHeightWithoutMargin(htmlElement)) {
 						$(htmlElement).outerHeight(outerHeight);
@@ -2493,7 +2494,7 @@ GrahaOdt2HtmlConverter.prototype.finalizeCollapseTableBorder = function(htmlElem
 	return new Promise(function(resolve, reject) {
 		window.setTimeout(function() {
 			try {
-				$(_this.wrapperSelector + " table").each(function() {
+				$(_this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " table").each(function() {
 					var boderCollapser = new GrahaOdtTableBorderCollapser({ignoreDotted: true});
 					boderCollapser.table(this);
 				});
@@ -2544,8 +2545,9 @@ GrahaOdt2HtmlConverter.prototype.prepareStyle = function() {
 	});
 };
 GrahaOdt2HtmlConverter.prototype.prepare = function() {
-	$(this.wrapperSelector).remove();
-	$(this.scaleWrapperSelector).remove();
+	if(this.htmlConverterWrapper != null) {
+		this.htmlConverterWrapper.clearAll();
+	}
 	return this.prepareStyle();
 };
 GrahaOdt2HtmlConverter.prototype.convertFromContentsUrl = function(metaUrl, headerUrl, contentUrl, options) {
@@ -2645,6 +2647,7 @@ GrahaOdt2HtmlConverter.prototype.convertFromOdtBlob = function(blob, options) {
 			});
 		}).catch(function(error) {
 			console.error(error);
+			reject(error);
 		});
 	});
 };
@@ -2672,6 +2675,7 @@ GrahaOdt2HtmlConverter.prototype.convertFromOdtUrl = function(url, options) {
 			});
 		}).catch(function(error) {
 			console.error(error);
+			reject(error);
 		});
 	});
 };

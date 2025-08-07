@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
 <meta charset="utf-8" />
-<title>GrahaOdtViewer</title>
+<title>GrahaHwpXViewer</title>
 <link rel="preload" href="//cdn.jsdelivr.net/font-nanum/1.0/nanummyeongjo/nanummyeongjo.css" as="style" />
 <link rel="stylesheet" href="//cdn.jsdelivr.net/font-nanum/1.0/nanummyeongjo/nanummyeongjo.css" />
 <link rel="preload" href="//cdn.jsdelivr.net/font-nanum/1.0/nanumgothic/nanumgothic.css" as="style" />
@@ -26,11 +26,13 @@
 <script src="//cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js"></script>
 
 <script src="GrahaHtmlConverterWrapper.js"></script>
+<script src="GrahaCSSProperties.js"></script>
+<script src="GrahaDummyElement.js"></script>
+<script src="GrahaOdtPageSplitterUtility.js"></script>
+<script src="GrahaHwpXPageSplitter.js"></script>
 <script src="GrahaPdfConverterUtility.js"></script>
 <script src="GrahaOdtTableBorderCollapser.js"></script>
-<script src="GrahaOdt2HtmlConverter.js"></script>
-<script src="GrahaOdtPageSplitterUtility.js"></script>
-<script src="GrahaOdtPageSplitter.js"></script>
+<script src="GrahaHwpX2HtmlConverter.js"></script>
 <script src="GrahaPdfConverter.js"></script>
 
 <style>
@@ -43,7 +45,6 @@ body {
 	margin-top: 45px;
 	margin-bottom: 10px;
 	padding: 0px;
-	background-color:rgb(212, 212, 215);
 }
 div#GrahaHtmlConverterWrapper,
 div#GrahaHtmlConverterScaleWrapper,
@@ -201,7 +202,7 @@ function dropHandler(event) {
 		$("span#pdf").hide();
 		$("span#download").hide();
 		window.devicePixelRatio = 1.25;
-		converter.convertFromOdtFile(file, {format: "splitted", adjustScale: true}).then(function() {
+		converter.convertFromHwpXFile(file, {format: "splitted", adjustScale: true}).then(function() {
 			displayMenu();
 		}).catch(function() {
 			$("div.container").show();
@@ -224,7 +225,7 @@ function init() {
 			$("span#pdf").hide();
 			$("span#download").hide();
 			window.devicePixelRatio = 1.25;
-			converter.convertFromOdtFile(file, {format: "splitted", adjustScale: true}).then(function() {
+			converter.convertFromHwpXFile(file, {format: "splitted", adjustScale: true}).then(function() {
 				displayMenu();
 			}).catch(function() {
 				$("div.container").show();
@@ -244,9 +245,11 @@ function init() {
 			converter = new GrahaPdfConverter();
 		}
 		var fileName = params.get("name");
-		converter.convertFromOdtUrl(params.get("path"), {format: "html", adjustScale: true, downloadFileName: fileName}).then(function() {
+		converter.convertFromHwpXUrl(params.get("path"), {format: "html", adjustScale: true, downloadFileName: fileName}).then(function() {
 			displayMenu();
-		}).catch(function() {
+		}).catch(function(error) {
+			alert(error.message);
+			alert(error.name);
 			$("div.container").show();
 		});
 	}
@@ -280,11 +283,9 @@ window.addEventListener("beforeprint", function(event) {
 		if(converter.overflow) {
 			converter.split();
 		}
-		converter.resetScale();
 	}
 });
 window.addEventListener("afterprint", function(event) {
-	converter.applyScale();
 });
 </script>
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.min.css" />

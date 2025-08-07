@@ -1,4 +1,4 @@
-# History of GrahaOdt2PdfConverter
+# History of GrahaViewer
 
 ## 1. 0.5
 
@@ -38,3 +38,10 @@
 	- Table 을 잘라낼 때, border 일부를 복사하지 못하는 버그 수정
 - GrahaOdtTableBorderCollapser 보완
 	- collapse 함수에서 Table 을 파라미터로 받을 수 있도록 개선
+	
+## 2. 0.6
+
+### 2.1. 0.6.0.0
+
+- Viewer 기능을 중심으로 변경
+- hwpx 지원 추가
