@@ -34,7 +34,8 @@
 - 한/글, Microsoft Word, OpenOffice(LibreOffice) 등으로 작성한 Template 으로부터 hwpx, oft, docx 등의 문서파일을 생성하기 위한 Javascript 라이브러리이다. 
 - 최종버전 : https://github.com/logicielkr/client_lib/tree/master/reporter/0.6.0.0
 
-## 6. GrahaOdt2PdfConverter
+## 6. GrahaViewer
 
-- GrahaOdt2PdfConverter 는 [Apache OpenOffice](https://www.openoffice.org/) Text 혹은 [LibreOffice](https://www.libreoffice.org/) Text 로 작성한 문서(.odt)를 html 혹은 pdf 로 변환하는 실험적인 라이브러리이다.
-- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/odt2pdf/0.5.0.4
+- GrahaViewer [한/글] 로 작성한 .hwpx 문서와 [Apache OpenOffice](https://www.openoffice.org/) Text 혹은 [LibreOffice](https://www.libreoffice.org/) Text 로 작성한 .odt 문서의 웹브라우저용 Viewer 이다.
+- 종래의 GrahaOdt2PdfConverter 는 GrahaViewer 로 통합되었다.
+- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.0
