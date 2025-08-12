@@ -1,0 +1,305 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+<meta charset="utf-8" />
+<title>GrahaHwpXViewer</title>
+<link rel="preload" href="//cdn.jsdelivr.net/font-nanum/1.0/nanummyeongjo/nanummyeongjo.css" as="style" />
+<link rel="stylesheet" href="//cdn.jsdelivr.net/font-nanum/1.0/nanummyeongjo/nanummyeongjo.css" />
+<link rel="preload" href="//cdn.jsdelivr.net/font-nanum/1.0/nanumgothic/nanumgothic.css" as="style" />
+<link rel="stylesheet" href="//cdn.jsdelivr.net/font-nanum/1.0/nanumgothic/nanumgothic.css" />
+
+<script src="//cdn.jsdelivr.net/npm/bluebird@3.3.4/js/browser/bluebird.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/has-font@1.0.2/hasfont.min.js"></script>
+
+<link rel="preload" href="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" as="script" />
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<link rel="preload" href="//cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" as="script" />
+<script src="//cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<link rel="preload" href="//cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" as="script" />
+<script src="//cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<link rel="preload" href="//cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/polyfills.umd.js" as="script" />
+<script src="//cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/polyfills.umd.js"></script>
+<link rel="preload" href="//cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" as="script" />
+<script src="//cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<link rel="preload" href="//cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js" as="script" />
+<script src="//cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js"></script>
+
+<script src="GrahaHtmlConverterWrapper.js"></script>
+<script src="GrahaCSSProperties.js"></script>
+<script src="GrahaDummyElement.js"></script>
+<script src="GrahaOdtPageSplitterUtility.js"></script>
+<script src="GrahaHwpXPageSplitter.js"></script>
+<script src="GrahaPdfConverterUtility.js"></script>
+<script src="GrahaOdtTableBorderCollapser.js"></script>
+<script src="GrahaHwpX2HtmlConverter.js"></script>
+<script src="GrahaPdfConverter.js"></script>
+
+<style>
+@page {
+	margin: 0px;
+}
+body {
+	margin-left: 0px;
+	margin-right: 0px;
+	margin-top: 45px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+div#GrahaHtmlConverterWrapper,
+div#GrahaHtmlConverterScaleWrapper,
+div.GrahaHtmlConverterFileWrapper
+{
+	margin-left: auto;
+	margin-right: auto;
+}
+div#menu_wrapper {
+	position:fixed;
+	top:0;
+	text-align:center;
+	height:35px;
+	background-color:rgb(249, 249, 250);
+	width:100%;
+	z-index:100;
+	vertical-align:middle;
+	box-shadow:rgb(184, 184, 184) 0px 1px 0px 0px;
+}
+div#menu_items {
+	position: absolute;
+	top: 50%;
+	transform: translate(0%, -50%);
+	font-size:12pt;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center;
+	width:100%;
+}
+div.container {
+	width:100%;
+	display: block;
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	height:calc(100% - 35px);
+	background-color:rgb(212, 212, 215);
+}
+span#split,
+span#pdf,
+span#print,
+span#download
+{
+	display:none;
+}
+@media print {
+	body, html {
+		margin: 0px;
+		margin-top: 0px;
+		margin-bottom: 0px;
+		padding: 0px;
+		height: 0px;
+	}
+	div#menu_wrapper {
+		display: none !important;
+	}
+	div#menu_items {
+		display: none !important;
+	}
+	div.container {
+		display: none !important;
+	}
+	div#GrahaHtmlConverterWrapper,
+	div#GrahaHtmlConverterScaleWrapper,
+	div.GrahaHtmlConverterFileWrapper
+	{
+		position: absolute;
+		top: 0px;
+		margin: 0px;
+		padding: 0px;
+	}
+	p.graha_page {
+		overflow: hidden;
+		border-bottom: 0;
+		margin-bottom: 0px;
+	}
+}
+</style>
+<script>
+var converter = null;
+function split() {
+	if(converter != null) {
+		converter.split();
+	}
+}
+function printer() {
+	if(window.document.documentMode) {
+		alert("IE 11 에서는 인쇄기능을 지원하지 않습니다.  PDF로 변환한 후에 인쇄해 주세요.");
+	} else {
+		window.print();
+	}
+}
+function pdf() {
+	if(converter != null) {
+		converter.pdf();
+	}
+}
+function download() {
+	if(converter != null) {
+		converter.download();
+	}
+}
+function displayMenu() {
+	window.setTimeout(function() {
+		if(converter != null) {
+			if(converter.getDownloadFileName() && converter.getDownloadFileName() != null) {
+				document.title = converter.getDownloadFileName();
+			}
+			$("body").css("background-color", $("div.container").css("background-color"));
+			
+			if(
+				$("div#GrahaHtmlConverterWrapper div.graha_header").length > 1 ||
+				$("div#GrahaHtmlConverterWrapper div.graha_footer").length > 1
+			) {
+				alert("지원하는 않는 항목이 있어서, Split 나 PDF 변환 기능을 사용할 수 없습니다.");
+			} else {
+				$("span#pdf").show();
+				$("span#print").show();
+			}
+			if(converter.downloadable()) {
+				$("span#download").show();
+			}
+		}
+	}, 10);
+}
+function removeDragData(event) {
+	if(event.dataTransfer) {
+		if(event.dataTransfer.items) {
+			event.dataTransfer.items.clear();
+		} else {
+			event.dataTransfer.clearData();
+		}
+	}
+}
+function dropHandler(event) {
+	event.preventDefault();
+	var file = null;
+	if(event.dataTransfer) {
+		if(event.dataTransfer.items) {
+			if(event.dataTransfer.items.length > 0) {
+				file = event.dataTransfer.items[0].getAsFile();
+			}
+		} else if(event.dataTransfer.files) {
+			if(event.dataTransfer.files.length > 0) {
+				file = event.dataTransfer.files[0];
+			}
+		}
+	}
+	if(file != null) {
+		if(converter == null) {
+			converter = new GrahaPdfConverter();
+		}
+		$("div.container").hide();
+		$("span#split").hide();
+		$("span#pdf").hide();
+		$("span#download").hide();
+		window.devicePixelRatio = 1.25;
+		converter.convertFromHwpXFile(file, {format: "splitted", adjustScale: true}).then(function() {
+			displayMenu();
+		}).catch(function() {
+			$("div.container").show();
+		});
+	}
+	removeDragData(event)
+}
+function dragOverHandler(event) {
+	event.preventDefault();
+}
+function init() {
+	$("input#file").on("change", function() {
+		for(var i = 0; i < this.files.length; i++) {
+			var file = this.files[i];
+			if(converter == null) {
+				converter = new GrahaPdfConverter();
+			}
+			$("div.container").hide();
+			$("span#split").hide();
+			$("span#pdf").hide();
+			$("span#download").hide();
+			window.devicePixelRatio = 1.25;
+			converter.convertFromHwpXFile(file, {format: "splitted", adjustScale: true}).then(function() {
+				displayMenu();
+			}).catch(function() {
+				$("div.container").show();
+			});
+		}
+	});
+	$("input#file").show();
+	$("div.container").on("drop", function(event) {
+		dropHandler(event);
+	});
+	$("div.container").on("dragover", function(event) {
+		dragOverHandler(event);
+	});
+	var params = new URLSearchParams(document.location.search.substring(1));
+	if(params.get("path") != null && params.get("path") != "") {
+		if(converter == null) {
+			converter = new GrahaPdfConverter();
+		}
+		var fileName = params.get("name");
+		converter.convertFromHwpXUrl(params.get("path"), {format: "html", adjustScale: true, downloadFileName: fileName}).then(function() {
+			displayMenu();
+		}).catch(function(error) {
+			alert(error.message);
+			alert(error.name);
+			$("div.container").show();
+		});
+	}
+}
+function IEReady() {
+	if(hasFont("Nanum Myeongjo") && hasFont("Nanum Gothic")) {
+		window.setTimeout(function() {
+			init();
+		}, 1000);
+	} else {
+		window.setTimeout(function() {
+			IEReady();
+		}, 300);
+	}
+}
+$(window).on("load", function() {
+	if(document.fonts) {
+		document.fonts.ready.then(function(fontFaceSet) {
+			window.setTimeout(function() {
+				init();
+			}, 1000);
+		});
+	} else {
+		IEReady();
+	}
+});
+</script>
+<script>
+window.addEventListener("beforeprint", function(event) {
+	if(converter != null) {
+		if(converter.overflow) {
+			converter.split();
+		}
+	}
+});
+window.addEventListener("afterprint", function(event) {
+});
+</script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.min.css" />
+</head>
+<body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+<div id="menu_wrapper">
+<div id="menu_items">
+<input type="file" id="file" style="display:none;" />
+<span id="split" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="split()">splitscreen</span>
+<span id="print" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="printer()">print</span>
+<span id="pdf" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="pdf()">picture_as_pdf</span>
+<span id="download" class="material-icons md-18" style="vertical-align:text-bottom;cursor:pointer;" onclick="download()">download</span>
+</div>
+</div>
+<div class="container"></div>
+</body>
+</html>
