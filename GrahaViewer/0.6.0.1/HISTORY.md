@@ -45,3 +45,21 @@
 
 - Viewer 기능을 중심으로 변경
 - hwpx 지원 추가
+
+### 2.2. 0.6.0.1
+
+- [x] hwpx.html 과 odt.html 에서 font cdn 에 preconnect 하도록 변경
+
+- [x] hwpx 에서 ```<font>``` 의 css 가 그 아래의 ```<table>``` 에 적용되지 않도록 수정
+
+- [x] hwpx 에서 color 값이 html 의 그것과 다르다.
+	- ```#0000FF``` : [한/글]에서는 red 로 표시
+	- ```#FF0000``` : [한/글]에서는 blue 로 표시
+	- [한/글] 은 color 값을 BGR 로 저장하는 것으로 생각됨 (R : 233, G : 174, B : 42 가 #2BAEE9으로 저장됨)
+	- ```#FFFFFFFF``` 혹은 ```#FF000000``` 와 같은 것들은,  RGBA 와 유사한 BGRA 라고 가정하고 처리하였음(테스트 X). 
+
+- [x] font-stretch (장평) 가 지원되는지 여부를 확인하여 관련 코드를 정리할 필요가 있음
+	- 기본 폰트 cdn (```//cdn.jsdelivr.net/font-nanum/1.0/nanumgothic/nanumgothic.css```) 의 font 는 font-stretch 를 지원하지 않음.
+	- 폰트 cdn 을 ```//fonts.googleapis.com/css2``` 로 시작하는 것으로 변경하면, font-stretch (장평) 가 처리되는 것으로 보임.
+	- 장평에 따라 font-size 를 줄이는 코드는 주석으로 막았음.
+	- PDF 변환할 때 사용하는 TrueType 도 같이 변경해야 함.

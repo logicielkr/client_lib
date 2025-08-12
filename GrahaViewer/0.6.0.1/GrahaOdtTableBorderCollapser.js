@@ -25,10 +25,10 @@
  * GrahaOdt2PdfConverter 전체적인 사용법은 README.md 를 참조한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.6.0.0
+ * @version 0.6.0.1
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.0
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.1
  */
 
 function GrahaOdtTableBorderCollapser(options) {

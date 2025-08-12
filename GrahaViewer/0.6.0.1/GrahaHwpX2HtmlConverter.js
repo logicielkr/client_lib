@@ -22,10 +22,10 @@
  * GrahaHwpX2HtmlConverter
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.6.0.0
+ * @version 0.6.0.1
  * @since 0.6
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.0
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.1
  */
 
 function GrahaHwpX2HtmlConverter() {
@@ -133,6 +133,16 @@ GrahaHwpX2HtmlConverter.prototype.convertToHwpUnit = function(value, unit) {
 			return GrahaPdfConverterUtility.convertToPtWithUnit(value, unit) * 100;
 		}
 	}
+};
+GrahaHwpX2HtmlConverter.prototype.convertColor = function(value) {
+	if(value.indexOf("#") == 0) {
+		if(value.length == 7) {
+			return "#" + value.substring(5, 7) + value.substring(3, 5) + value.substring(1, 3);
+		} else if(value.length == 9) {
+			return "#" + value.substring(5, 7) + value.substring(3, 5) + value.substring(1, 3) + value.substring(7, 9);
+		}
+	}
+	return value;
 };
 GrahaHwpX2HtmlConverter.prototype.convertToPt = function(value, unit) {
 	if(arguments.length == 1) {
@@ -1579,7 +1589,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromBorderFill = function(bo
 			if(borderFill.leftBorder.type && borderFill.leftBorder.type != null) {
 				if(borderFill.leftBorder.type != "NONE") {
 					properties.replace("border-left-style", borderFill.leftBorder.type);
-					properties.push("border-left-color", borderFill.leftBorder.color);
+					properties.push("border-left-color", this.convertColor(borderFill.leftBorder.color));
 					properties.push("border-left-width", this.splitValueAndUnit(borderFill.leftBorder.width));
 				}
 			}
@@ -1588,7 +1598,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromBorderFill = function(bo
 			if(borderFill.rightBorder.type && borderFill.rightBorder.type != null) {
 				if(borderFill.rightBorder.type != "NONE") {
 					properties.replace("border-right-style", borderFill.rightBorder.type);
-					properties.push("border-right-color", borderFill.rightBorder.color);
+					properties.push("border-right-color", this.convertColor(borderFill.rightBorder.color));
 					properties.push("border-right-width", this.splitValueAndUnit(borderFill.rightBorder.width));
 				}
 			}
@@ -1597,7 +1607,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromBorderFill = function(bo
 			if(borderFill.topBorder.type && borderFill.topBorder.type != null) {
 				if(borderFill.topBorder.type != "NONE") {
 					properties.replace("border-top-style", borderFill.topBorder.type);
-					properties.push("border-top-color", borderFill.topBorder.color);
+					properties.push("border-top-color", this.convertColor(borderFill.topBorder.color));
 					properties.push("border-top-width", this.splitValueAndUnit(borderFill.topBorder.width));
 				}
 			}
@@ -1606,7 +1616,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromBorderFill = function(bo
 			if(borderFill.bottomBorder.type && borderFill.bottomBorder.type != null) {
 				if(borderFill.bottomBorder.type != "NONE") {
 					properties.replace("border-bottom-style", borderFill.bottomBorder.type);
-					properties.push("border-bottom-color", borderFill.bottomBorder.color);
+					properties.push("border-bottom-color", this.convertColor(borderFill.bottomBorder.color));
 					properties.push("border-bottom-width", this.splitValueAndUnit(borderFill.bottomBorder.width));
 				}
 			}
@@ -1624,7 +1634,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharProperty = function(
 			properties.push("font-size", fontSize, "pt");
 		}
 		if(charProperty.textColor && charProperty.textColor != null) {
-			properties.push("color", charProperty.textColor);
+			properties.push("color", this.convertColor(charProperty.textColor));
 		}
 		if(charProperty.borderFillIDRef && charProperty.borderFillIDRef != null) {
 			var props = this.getStylePropertiesFromBorderFill(charProperty.borderFillIDRef);
@@ -1652,8 +1662,10 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharProperty = function(
 		if(charProperty.ratio && charProperty.ratio!= null) {
 			if(charProperty.ratio.hangul && charProperty.ratio.hangul != null) {
 				if(charProperty.ratio.hangul != "100") {
-//font-stretch 는 Deprecated 되었고, font-width 는 아직 지원하지 않는다. => 어쩌면 font 가 지원하지 않는 것을 수도 있다.
-					properties.replace("font-size", (fontSize * this.parseInt(charProperty.ratio.hangul) / 100), "pt");
+//font-width 는 아직이다.
+//font-stretch 는 명세서에는 Deprecated 되었다고 기술되어 있지만, Firefox 기준으로 font 만 지원하면 지원한다.
+//단, 기본폰트는 font-stretch 를 지원하지 않는다.
+//					properties.replace("font-size", (fontSize * this.parseInt(charProperty.ratio.hangul) / 100), "pt");
 					properties.replace("font-stretch", charProperty.ratio.hangul, "%");
 					properties.replace("font-width", charProperty.ratio.hangul, "%");
 				}
@@ -1753,7 +1765,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromParaProperty = function(
 									properties.push("padding-left", this.convertToPt(paraProperty.border.offsetLeft), "pt");
 								}
 								properties.push("border-left-style", borderFill.leftBorder.type);
-								properties.push("border-left-color", borderFill.leftBorder.color);
+								properties.push("border-left-color", this.convertColor(borderFill.leftBorder.color));
 								properties.push("border-left-width", this.splitValueAndUnit(borderFill.leftBorder.width));
 							}
 						}
@@ -1765,7 +1777,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromParaProperty = function(
 									properties.push("padding-right", this.convertToPt(paraProperty.border.offsetRight), "pt");
 								}
 								properties.push("border-right-style", borderFill.rightBorder.type);
-								properties.push("border-right-color", borderFill.rightBorder.color);
+								properties.push("border-right-color", this.convertColor(borderFill.rightBorder.color));
 								properties.push("border-right-width", this.splitValueAndUnit(borderFill.rightBorder.width));
 							}
 						}
@@ -1777,7 +1789,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromParaProperty = function(
 									properties.push("padding-top", this.convertToPt(paraProperty.border.offsetTop), "pt");
 								}
 								properties.push("border-top-style", borderFill.topBorder.type);
-								properties.push("border-top-color", borderFill.topBorder.color);
+								properties.push("border-top-color", this.convertColor(borderFill.topBorder.color));
 								properties.push("border-top-width", this.splitValueAndUnit(borderFill.topBorder.width));
 							}
 						}
@@ -1789,7 +1801,7 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromParaProperty = function(
 									properties.push("padding-bottom", this.convertToPt(paraProperty.border.offsetBottom), "pt");
 								}
 								properties.push("border-bottom-style", borderFill.bottomBorder.type);
-								properties.push("border-bottom-color", borderFill.bottomBorder.color);
+								properties.push("border-bottom-color", this.convertColor(borderFill.bottomBorder.color));
 								properties.push("border-bottom-width", this.splitValueAndUnit(borderFill.bottomBorder.width));
 							}
 						}
@@ -1948,8 +1960,8 @@ GrahaHwpX2HtmlConverter.prototype.initPageFootNote = function() {
 	if(this.footNoteLayout && this.footNoteLayout != null) {
 		if(this.footNoteLayout.noteLine && this.footNoteLayout.noteLine != null) {
 			if(this.footNoteLayout.noteLine.color && this.footNoteLayout.noteLine.color != null) {
-				style.push("color", this.footNoteLayout.noteLine.color);
-				style.push("background-color", this.footNoteLayout.noteLine.color);
+				style.push("color", this.convertColor(this.footNoteLayout.noteLine.color));
+				style.push("background-color", this.convertColor(this.footNoteLayout.noteLine.color));
 			}
 			if(this.footNoteLayout.noteLine.width && this.footNoteLayout.noteLine.width != null) {
 				style.push("height", this.splitValueAndUnit(this.footNoteLayout.noteLine.width));
@@ -2684,6 +2696,7 @@ GrahaHwpX2HtmlConverter.prototype.tbl = function(node, parentElement) {
 		var attributes = node.attributes;
 		var cellStyle = new GrahaCSSProperties();
 		var style = new GrahaCSSProperties();
+		style.push("all", "initial");
 		style.push("border-collapse", "collapse");
 		style.push("box-sizing", "border-box");
 		var rowAttrs = new Array();
@@ -3785,7 +3798,7 @@ INSIDE_BOTTOM	OUTSIDE_BOTTOM
 					if(autoNum.num && autoNum.num != null) {
 						if(parentElement && parentElement != null) {
 							this.setCurrentAutoNum(autoNum);
-							if(autoNum.numType && autoNum.numType != null && autoNum.numType == "PAGE") {
+							if(autoNum.numType && autoNum.numType != null && (autoNum.numType == "PAGE" || autoNum.numType == "TOTAL_PAGE")) {
 								var span = this.createElement("span");
 								span.setAttribute("class", "autoNum");
 								span.setAttribute("data-numType", autoNum.numType);
