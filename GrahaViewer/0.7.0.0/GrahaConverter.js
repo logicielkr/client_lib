@@ -19,10 +19,10 @@
  */
 
 /**
- * GrahaPdfConverter
+ * GrahaConverter
  * odt 혹은 hwpx 로부터 만들어진 HTML 을 PDF 로 변경한다.
 
- * GrahaPdfConverter 전체적인 사용법은 README.md 를 참조한다.
+ * GrahaConverter 전체적인 사용법은 README.md 를 참조한다.
 
  * @author HeonJik, KIM (https://graha.kr)
  * @version 0.6.0.1
@@ -31,14 +31,14 @@
  * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.1
  */
 
-function GrahaPdfConverter(options) {
+function GrahaConverter(options) {
 	if(arguments.length > 0) {
 		this.init(options);
 	} else {
 		this.init();
 	}
 }
-GrahaPdfConverter.prototype.init = function(options) {
+GrahaConverter.prototype.init = function(options) {
 	if(arguments.length > 0 && options != null && options.fonts && options.fonts != null) {
 		this.setFonts(options.fonts);
 	} else {
@@ -52,12 +52,12 @@ GrahaPdfConverter.prototype.init = function(options) {
 	if(arguments.length > 0 && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
 		this.fontFamilyConverter = options.fontFamilyConverter;
 	} else {
-		this.fontFamilyConverter = GrahaPdfConverter.defaultFontFamilyConverter;
+		this.fontFamilyConverter = GrahaConverter.defaultFontFamilyConverter;
 	}
 	if(arguments.length > 0 && options != null && options.format && options.format != null) {
 		this.format = options.format;
 	} else {
-		this.format = "pdf";
+		this.format = "splitted";
 	}
 	if(arguments.length > 0 && options != null && options.adjustScale && options.adjustScale != null) {
 		this.adjustScale = options.adjustScale;
@@ -69,31 +69,34 @@ GrahaPdfConverter.prototype.init = function(options) {
 	} else {
 		this.fileFormat = "odt";
 	}
+	this.htmlConverter = null;
 };
-GrahaPdfConverter.prototype.pdf = function() {
+GrahaConverter.prototype.pdf = function() {
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		if(_this.currentFormat == "html") {
-			_this.split();
-		}
-		if(_this.currentFormat == "splitted" || _this.currentFormat == "pdf") {
-			_this.prepareFont(_this.htmlElement, _this.pdfProperties).then(function(data) {
-				_this.currentFormat = "pdf";
-				resolve(data);
-			}).catch(function(error) {
-				console.error(error);
-				reject(error);
-			});
-		}
+		_this.split().then(function(result) {
+			if(_this.currentFormat == "splitted" || _this.currentFormat == "pdf") {
+				_this.prepareFont(_this.htmlElement, _this.pdfProperties).then(function(data) {
+					_this.currentFormat = "pdf";
+					resolve(data);
+				}).catch(function(error) {
+					console.error(error);
+					reject(error);
+				});
+			}
+		}).catch(function(error) {
+			console.error(error);
+			reject(error);
+		});
 	});
 };
-GrahaPdfConverter.prototype.getValueStripUnit = function(value, unit) {
-	return GrahaPdfConverterUtility.getValueStripUnit(value, unit);
+GrahaConverter.prototype.getValueStripUnit = function(value, unit) {
+	return GrahaConverterUtility.getValueStripUnit(value, unit);
 };
-GrahaPdfConverter.prototype.getUnit = function(value) {
-	return GrahaPdfConverterUtility.getUnit(value);
+GrahaConverter.prototype.getUnit = function(value) {
+	return GrahaConverterUtility.getUnit(value);
 };
-GrahaPdfConverter.prototype.loadFontFromUrl = function(font) {
+GrahaConverter.prototype.loadFontFromUrl = function(font) {
 	var ttfFileName = font.truetype.substring(font.truetype.lastIndexOf("/") + 1);
 	var fontStyle = "normal";
 	var fontWeight = "normal";
@@ -138,7 +141,7 @@ GrahaPdfConverter.prototype.loadFontFromUrl = function(font) {
 		});
 	});
 };
-GrahaPdfConverter.prototype.prepareFont = function(htmlElement, pdfProperties) {
+GrahaConverter.prototype.prepareFont = function(htmlElement, pdfProperties) {
 	var fonts = new Array();
 	if(this.fonts && this.fonts != null && Array.isArray(this.fonts) && this.fonts.length > 0) {
 		for(var i = 0; i < this.fonts.length; i++) {
@@ -170,7 +173,7 @@ GrahaPdfConverter.prototype.prepareFont = function(htmlElement, pdfProperties) {
 		});
 	}
 };
-GrahaPdfConverter.prototype.preparePdf = function(fonts, htmlElement, pdfProperties) {
+GrahaConverter.prototype.preparePdf = function(fonts, htmlElement, pdfProperties) {
 	if (!window.jsPDF) window.jsPDF = window.jspdf.jsPDF;
 	var options = {
 		orientation: "p",
@@ -193,11 +196,11 @@ GrahaPdfConverter.prototype.preparePdf = function(fonts, htmlElement, pdfPropert
 					var pageHeight = this.getValueStripUnit(this.pageLayout.pageHeight, unit);
 					if(pageHeight != null) {
 						if(unit == "cm") {
-							pageHeight = GrahaPdfConverterUtility.floorWith(pageHeight, 2);
-							pageWidth = GrahaPdfConverterUtility.floorWith(pageWidth, 2);
+							pageHeight = GrahaConverterUtility.floorWith(pageHeight, 2);
+							pageWidth = GrahaConverterUtility.floorWith(pageWidth, 2);
 						} else if(unit == "pt" || unit == "px" || unit == "mm") {
-							pageHeight = GrahaPdfConverterUtility.floorWith(pageHeight, 1);
-							pageWidth = GrahaPdfConverterUtility.floorWith(pageWidth, 1);
+							pageHeight = GrahaConverterUtility.floorWith(pageHeight, 1);
+							pageWidth = GrahaConverterUtility.floorWith(pageWidth, 1);
 						}
 						options.format = [pageWidth, pageHeight];
 					} else {
@@ -274,8 +277,6 @@ GrahaPdfConverter.prototype.preparePdf = function(fonts, htmlElement, pdfPropert
 	var _this = this;
 	return new Promise(function(resolve, reject) {
 		_this.finilize(doc, options, sourceElement, margin, scaleRatio, canvasHeight, canvasWidth).then(function(pdf) {
-//			console.log(doc.getFontList());
-//			window.open(doc.output('bloburl'));
 			doc.save(_this.outputFileName);
 			doc = new jsPDF();
 			doc = null;
@@ -286,8 +287,7 @@ GrahaPdfConverter.prototype.preparePdf = function(fonts, htmlElement, pdfPropert
 		});
 	});
 };
-
-GrahaPdfConverter.prototype.finilize = function(doc, options, sourceElement, margin, scaleRatio, canvasHeight, canvasWidth) {
+GrahaConverter.prototype.finilize = function(doc, options, sourceElement, margin, scaleRatio, canvasHeight, canvasWidth) {
 	var _this = this;
 	return new Promise(function(resolve, reject) {
 		doc.html(sourceElement, {
@@ -337,49 +337,65 @@ GrahaPdfConverter.prototype.finilize = function(doc, options, sourceElement, mar
 		});
 	});
 };
-GrahaPdfConverter.prototype.setOutputFileName = function(fileName) {
+GrahaConverter.prototype.setOutputFileName = function(fileName) {
 	this.outputFileName = fileName;
 };
-GrahaPdfConverter.prototype.getOutputFileName = function(fileName) {
+GrahaConverter.prototype.getOutputFileName = function(fileName) {
 	return this.outputFileName;
 };
-GrahaPdfConverter.prototype.setDownloadFileName = function(fileName) {
+GrahaConverter.prototype.setDownloadFileName = function(fileName) {
 	this.downloadFileName = fileName;
 };
-GrahaPdfConverter.prototype.getDownloadFileName = function() {
+GrahaConverter.prototype.getDownloadFileName = function() {
 	return this.downloadFileName;
 };
-GrahaPdfConverter.prototype.getDownloadMimeType = function() {
-//	if(this.fileFormat == "odt") {
+GrahaConverter.prototype.getDownloadMimeType = function() {
 	if(this.fileFormat == "hwpx") {
 		return "application/hwp+zip";
 	} else {
 		return "application/vnd.oasis.opendocument.text";
 	}
 };
-GrahaPdfConverter.prototype.split = function() {
-	if(this.currentFormat == "html") {
-		if(this.fileFormat == "odt") {
-			var splitter = new GrahaOdtPageSplitter({scaleRatio: this.scaleRatio, pageLayout: this.pageLayout}, this.htmlConverterWrapper);
-			splitter.split();
+GrahaConverter.prototype.split = function() {
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(_this.currentFormat == "html") {
+			if(_this.fileFormat == "odt") {
+				if(_this.htmlConverter == null) {
+					reject("this.htmlConverter is null");
+				} else {
+					_this.htmlConverter.split().then(function(result) {
+						_this.currentFormat = "splitted";
+						resolve(true);
+					}).catch(function(error) {
+						console.log(error);
+						reject(error);
+					});
+				}
+			} else {
+				_this.currentFormat = "splitted";
+				resolve(true);
+			}
+		} else {
+			resolve(true);
 		}
-		this.currentFormat = "splitted";
-	}
+	});
 };
-GrahaPdfConverter.prototype.getHtmlConverter = function() {
+GrahaConverter.prototype.getHtmlConverter = function() {
 	if(this.fileFormat == "hwpx") {
-		return new GrahaHwpX2HtmlConverter();
+		this.htmlConverter = new GrahaHwpX2HtmlConverter();
 	} else {
-		return new GrahaOdt2HtmlConverter();
+		this.htmlConverter = new GrahaOdt2HtmlConverter();
 	}
+	return this.htmlConverter;
 };
-GrahaPdfConverter.prototype.prepareConvert = function(options) {
+GrahaConverter.prototype.prepareConvert = function(options) {
 	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
 		this.fontFamilyConverter = options.fontFamilyConverter;
 	} else {
 		if(this.fontFamilyConverter && this.fontFamilyConverter != null) {
 		} else {
-			this.fontFamilyConverter = GrahaPdfConverter.defaultFontFamilyConverter;
+			this.fontFamilyConverter = GrahaConverter.defaultFontFamilyConverter;
 		}
 	}
 	if(options && options != null && options.format && options.format != null) {
@@ -387,7 +403,7 @@ GrahaPdfConverter.prototype.prepareConvert = function(options) {
 	} else {
 		if(this.format && this.format != null) {
 		} else {
-			this.format = "pdf";
+			this.format = "splitted";
 		}
 	}
 	if(options && options != null && options.adjustScale && options.adjustScale != null) {
@@ -437,86 +453,25 @@ GrahaPdfConverter.prototype.prepareConvert = function(options) {
 		}
 	}
 };
-GrahaPdfConverter.prototype.convertFromOdtContentsUrl = function(metaUrl, headerUrl, contentUrl, options) {
-	this.prepareConvert(options);
-	var htmlConverter = this.getHtmlConverter();
-	var _this = this;
-	return new Promise(function(resolve, reject) {
-		htmlConverter.convertFromContentsUrl(metaUrl, headerUrl, contentUrl, {
-			defaultFontFamily: _this.defaultFontFamily,
-			fontFamilyConverter: _this.fontFamilyConverter,
-			adjustScale: _this.adjustScale
-		}).then(function(data) {
-			_this.currentFormat = "html";
-			_this.htmlElement = data.htmlElement;
-			_this.pdfProperties = data.pdfProperties;
-			_this.htmlConverterWrapper = data.htmlConverterWrapper;
-			_this.pageLayout = data.pageLayout;
-			_this.binary = data.binary;
-			_this.overflow = data.overflow;
-			_this.scaleRatio = data.scaleRatio;
-			
-			if(_this.format == "splitted" || _this.format == "pdf") {
-				_this.split();
-				if(_this.format == "pdf") {
-					_this.pdf().then(function(pdf) {
-						resolve(pdf);
-					}).catch(function(error) {
-						console.error(error);
-						reject(error);
-					});
-				} else {
-					resolve(data);
-				}
-			} else {
-				resolve(data);
-			}
-		}).catch(function(error) {
-			console.error(error);
-			reject(error);
-		});
-	});
+GrahaConverter.prototype.convertFromOdtContentsUrl = function(metaUrl, headerUrl, contentUrl, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.fileFormat = "odt";
+	options.sourceType = "contentsUrl";
+	return this.convert([metaUrl, headerUrl, contentUrl], options);
 };
-GrahaPdfConverter.prototype.convertFromOdtContents = function(meta, header, content, options) {
-	this.prepareConvert(options);
-	var htmlConverter = this.getHtmlConverter();
-	var _this = this;
-	return new Promise(function(resolve, reject) {
-		htmlConverter.convertFromContents(meta, header, content, {
-			defaultFontFamily: _this.defaultFontFamily,
-			fontFamilyConverter: _this.fontFamilyConverter,
-			adjustScale: _this.adjustScale
-		}).then(function(data) {
-			_this.currentFormat = "html";
-			_this.htmlElement = data.htmlElement;
-			_this.pdfProperties = data.pdfProperties;
-			_this.htmlConverterWrapper = data.htmlConverterWrapper;
-			_this.pageLayout = data.pageLayout;
-			_this.binary = data.binary;
-			_this.overflow = data.overflow;
-			_this.scaleRatio = data.scaleRatio;
-			if(_this.format == "splitted" || _this.format == "pdf") {
-				_this.split();
-				if(_this.format == "pdf") {
-					_this.pdf().then(function(pdf) {
-						resolve(pdf);
-					}).catch(function(error) {
-						console.error(error);
-						reject(error);
-					});
-				} else {
-					resolve(data);
-				}
-			} else {
-				resolve(data);
-			}
-		}).catch(function(error) {
-			console.error(error);
-			reject(error);
-		});
-	});
+GrahaConverter.prototype.convertFromOdtContents = function(meta, header, content, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.fileFormat = "odt";
+	options.sourceType = "contents";
+	return this.convert([meta, header, content], options);
 };
-GrahaPdfConverter.prototype.convertFromOdtFile = function(file, options) {
+GrahaConverter.prototype.convertFromOdtFile = function(file, options) {
 	if(arguments.length > 1 && options && options != null) {
 	} else {
 		options = {};
@@ -524,7 +479,7 @@ GrahaPdfConverter.prototype.convertFromOdtFile = function(file, options) {
 	options.fileFormat = "odt";
 	return this.convertFromFile(file, options);
 };
-GrahaPdfConverter.prototype.convertFromHwpXFile = function(file, options) {
+GrahaConverter.prototype.convertFromHwpXFile = function(file, options) {
 	if(arguments.length > 1 && options && options != null) {
 	} else {
 		options = {};
@@ -532,191 +487,119 @@ GrahaPdfConverter.prototype.convertFromHwpXFile = function(file, options) {
 	options.fileFormat = "hwpx";
 	return this.convertFromFile(file, options);
 };
-GrahaPdfConverter.prototype.convertFromFile = function(file, options) {
-	if(options && options != null) {
-	} else {
-		options = {};
-	}
-	if(options.outputFileName && options.outputFileName != null) {
-	} else {
-		if(file.name && file.name != null && file.name.lastIndexOf(".") > 0) {
-			var odtFileName = file.name;
-			var pdfFileName = null;
-			var fileExtension = null;
-			if(odtFileName.lastIndexOf(".") > 0) {
-				pdfFileName = odtFileName.substring(0, odtFileName.lastIndexOf(".")) + ".pdf";
-				fileExtension = odtFileName.substring(odtFileName.lastIndexOf(".") + 1);
+GrahaConverter.fileName = function(source) {
+	var fileName = null;
+	if(source && source != null) {
+		if(typeof(source) == "string") {
+			var url = null;
+			if(source.lastIndexOf("?") > 0) {
+				url = source.substring(0, source.lastIndexOf("?"));
 			} else {
-				pdfFileName = odtFileName + ".pdf";
-				if(options.fileFormat && options.fileFormat != null) {
-					odtFileName = odtFileName + "." + options.fileFormat;
-				}
+				url = source;
 			}
-			options.outputFileName = pdfFileName;
-			if(options.fileFormat && options.fileFormat != null) {
-			} else if(fileExtension != null) {
-				options.fileFormat = fileExtension;
+			if(url.lastIndexOf("/") > 0) {
+				fileName = decodeURIComponent(url.substring(url.lastIndexOf("/") + 1));
 			}
-			if(options.downloadFileName && options.downloadFileName != null) {
-			} else {
-				options.downloadFileName = odtFileName;
-			}
+		} else if(source.name && source.name != null) {
+			fileName = source.name;
 		}
 	}
-	this.prepareConvert(options);
-	var htmlConverter = this.getHtmlConverter();
-	var _this = this;
-	return new Promise(function(resolve, reject) {
-		htmlConverter.convertFromFile(file, {
-			defaultFontFamily: _this.defaultFontFamily,
-			fontFamilyConverter: _this.fontFamilyConverter,
-			adjustScale: _this.adjustScale
-		}).then(function(data) {
-			_this.currentFormat = "html";
-			_this.htmlElement = data.htmlElement;
-			_this.pdfProperties = data.pdfProperties;
-			_this.htmlConverterWrapper = data.htmlConverterWrapper;
-			_this.pageLayout = data.pageLayout;
-			_this.binary = data.binary;
-			_this.overflow = data.overflow;
-			_this.scaleRatio = data.scaleRatio;
-			if(_this.format == "splitted" || _this.format == "pdf") {
-				_this.split();
-				if(_this.format == "pdf") {
-					_this.pdf().then(function(pdf) {
-						resolve(pdf);
-					}).catch(function(error) {
-						console.error(error);
-						reject(error);
-					});
-				} else {
-					resolve(data);
-				}
-			} else {
-				resolve(data);
-			}
-		}).catch(function(error) {
-			console.error(error);
-			reject(error);
-		});
-	});
+	return fileName;
 };
-GrahaPdfConverter.prototype.convertFromOdtBlob = function(blob, options) {
-	if(arguments.length > 1 && options && options != null) {
-	} else {
-		options = {};
+GrahaConverter.detectFileName = function(source, options) {
+	var fileName = null;
+	if(options && options != null && options.fileName && options.fileName != null) {
+		fileName = options.fileName;
+	} else if(source && source != null) {
+		fileName = GrahaConverter.fileName(source);
+	} else if(options && options != null && options.downloadFileName && options.downloadFileName != null) {
+		fileName = options.downloadFileName;
+	} else if(options && options != null && options.outputFileName && options.outputFileName != null) {
+		fileName = options.outputFileName;
 	}
-	options.fileFormat = "odt";
-	return this.convertFromBlob(blob, options);
-};
-GrahaPdfConverter.prototype.convertFromHwpXBlob = function(blob, options) {
-	if(arguments.length > 1 && options && options != null) {
-	} else {
-		options = {};
-	}
-	options.fileFormat = "hwpx";
-	return this.convertFromBlob(blob, options);
-};
-GrahaPdfConverter.prototype.convertFromBlob = function(blob, options) {
-	this.prepareConvert(options);
-	var htmlConverter = this.getHtmlConverter();
-	var _this = this;
-	return new Promise(function(resolve, reject) {
-		htmlConverter.convertFromBlob(blob, {
-			defaultFontFamily: _this.defaultFontFamily,
-			fontFamilyConverter: _this.fontFamilyConverter,
-			adjustScale: _this.adjustScale
-		}).then(function(data) {
-			_this.currentFormat = "html";
-			_this.htmlElement = data.htmlElement;
-			_this.pdfProperties = data.pdfProperties;
-			_this.htmlConverterWrapper = data.htmlConverterWrapper;
-			_this.pageLayout = data.pageLayout;
-			_this.binary = data.binary;
-			_this.overflow = data.overflow;
-			_this.scaleRatio = data.scaleRatio;
-			if(_this.format == "splitted" || _this.format == "pdf") {
-				_this.split();
-				if(_this.format == "pdf") {
-					_this.pdf().then(function(pdf) {
-						resolve(pdf);
-					}).catch(function(error) {
-						console.error(error);
-						reject(error);
-					});
-				} else {
-					resolve(data);
-				}
-			} else {
-				resolve(data);
-			}
-		}).catch(function(error) {
-			console.error(error);
-			reject(error);
-		});
-	});
-};
-GrahaPdfConverter.prototype.convertFromOdtUrl = function(url, options) {
-	if(arguments.length > 1 && options && options != null) {
-	} else {
-		options = {};
-	}
-	options.fileFormat = "odt";
-	return this.convertFromUrl(url, options);
-};
-GrahaPdfConverter.prototype.convertFromHwpXUrl = function(url, options) {
-	if(arguments.length > 1 && options && options != null) {
-	} else {
-		options = {};
-	}
-	options.fileFormat = "hwpx";
-	return this.convertFromUrl(url, options);
-};
-GrahaPdfConverter.prototype.convertFromUrl = function(url, options) {
-	if(options && options != null) {
-	} else {
-		options = {};
-	}
-	if(options.outputFileName && options.outputFileName != null) {
-	} else {
-		var odtUrl = null;
-		if(url.lastIndexOf("?") > 0) {
-			odtUrl = url.substring(0, url.lastIndexOf("?"));
+	if(fileName != null) {
+		if(options && options != null) {
 		} else {
-			odtUrl = url;
+			options = {};
 		}
-		if(odtUrl.lastIndexOf("/") > 0) {
-			var odtFileName = decodeURIComponent(odtUrl.substring(odtUrl.lastIndexOf("/") + 1));
-			var pdfFileName = null;
-			var fileExtension = null;
-			if(odtFileName.lastIndexOf(".") > 0) {
-				pdfFileName = odtFileName.substring(0, odtFileName.lastIndexOf(".")) + ".pdf";
-				fileExtension = odtFileName.substring(odtFileName.lastIndexOf(".") + 1);
-			} else {
-				pdfFileName = odtFileName + ".pdf";
-				if(options.fileFormat && options.fileFormat != null) {
-					odtFileName = odtFileName + "." + options.fileFormat;
-				}
-			}
-			options.outputFileName = pdfFileName;
+		var pdfFileName = null;
+		var fileExtension = null;
+		if(fileName.lastIndexOf(".") > 0) {
+			pdfFileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".pdf";
+			fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+		} else {
+			pdfFileName = fileName + ".pdf";
 			if(options.fileFormat && options.fileFormat != null) {
-			} else if(fileExtension != null) {
-				options.fileFormat = fileExtension;
+				fileName = fileName + "." + options.fileFormat;
 			}
-			if(options.downloadFileName && options.downloadFileName != null) {
+		}
+		if(options.outputFileName && options.outputFileName != null) {
+		} else {
+			options.outputFileName = pdfFileName;
+		}
+		if(options.fileFormat && options.fileFormat != null) {
+		} else if(fileExtension != null && fileExtension != "pdf") {
+			options.fileFormat = fileExtension;
+		}
+		if(options.downloadFileName && options.downloadFileName != null) {
+		} else {
+			if(fileExtension == null) {
+				options.downloadFileName = fileName;
+			} else if(fileExtension == "pdf") {
+				options.downloadFileName = fileName.substring(0, fileName.lastIndexOf("."));
 			} else {
-				options.downloadFileName = odtFileName;
+				options.downloadFileName = fileName;
 			}
 		}
 	}
+	if(options.outputFileName && options.outputFileName != null) {
+	} else {
+		options.downloadFileName = "demo.pdf";
+	}
+	if(options.downloadFileName && options.downloadFileName != null) {
+	} else {
+		if(options && options != null && options.fileFormat && options.fileFormat != null) {
+			options.downloadFileName = "demo" + options.fileFormat;
+		} else {
+			options.downloadFileName = "demo";
+		}
+	}
+};
+GrahaConverter.prototype.convertFromFile = function(file, options) {
+	if(options && options != null) {
+	} else {
+		options = {};
+	}
+	GrahaConverter.detectFileName(file, options);
+	options.sourceType = "file";
+	return this.convert(file, options);
+};
+GrahaConverter.prototype.convertFromOdtBlob = function(blob, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.fileFormat = "odt";
+	return this.convertFromBlob(blob, options);
+};
+GrahaConverter.prototype.convertFromHwpXBlob = function(blob, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.fileFormat = "hwpx";
+	return this.convertFromBlob(blob, options);
+};
+GrahaConverter.prototype.convert = function(source, options) {
 	this.prepareConvert(options);
 	var htmlConverter = this.getHtmlConverter();
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		htmlConverter.convertFromUrl(url, {
+		htmlConverter.convert(source, {
 			defaultFontFamily: _this.defaultFontFamily,
 			fontFamilyConverter: _this.fontFamilyConverter,
-			adjustScale: _this.adjustScale
+			adjustScale: _this.adjustScale,
+			sourceType: options.sourceType
 		}).then(function(data) {
 			_this.currentFormat = "html";
 			_this.htmlElement = data.htmlElement;
@@ -727,17 +610,20 @@ GrahaPdfConverter.prototype.convertFromUrl = function(url, options) {
 			_this.overflow = data.overflow;
 			_this.scaleRatio = data.scaleRatio;
 			if(_this.format == "splitted" || _this.format == "pdf") {
-				_this.split();
-				if(_this.format == "pdf") {
-					_this.pdf().then(function(pdf) {
-						resolve(pdf);
-					}).catch(function(error) {
-						console.error(error);
-						reject(error);
-					});
-				} else {
-					resolve(data);
-				}
+				_this.split().then(function(result) {
+					if(_this.format == "pdf") {
+						_this.pdf().then(function(pdf) {
+							resolve(pdf);
+						}).catch(function(error) {
+							console.error(error);
+							reject(error);
+						});
+					} else {
+						resolve(data);
+					}
+				}).catch(function(error) {
+					reject(error);
+				});
 			} else {
 				resolve(data);
 			}
@@ -747,19 +633,53 @@ GrahaPdfConverter.prototype.convertFromUrl = function(url, options) {
 		});
 	});
 };
-GrahaPdfConverter.prototype.defaultFontFamily = function() {
+GrahaConverter.prototype.convertFromBlob = function(blob, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.sourceType = "blob";
+	GrahaConverter.detectFileName(null, options);
+	return this.convert(blob, options);
+};
+GrahaConverter.prototype.convertFromOdtUrl = function(url, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.fileFormat = "odt";
+	return this.convertFromUrl(url, options);
+};
+GrahaConverter.prototype.convertFromHwpXUrl = function(url, options) {
+	if(arguments.length > 1 && options && options != null) {
+	} else {
+		options = {};
+	}
+	options.fileFormat = "hwpx";
+	return this.convertFromUrl(url, options);
+};
+GrahaConverter.prototype.convertFromUrl = function(url, options) {
+	if(options && options != null) {
+	} else {
+		options = {};
+	}
+	GrahaConverter.detectFileName(url, options);
+	options.sourceType = "url";
+	return this.convert(url, options);
+};
+GrahaConverter.prototype.defaultFontFamily = function() {
 	this.defaultFontFamily = null;
 	if(this.fonts && this.fonts != null && Array.isArray(this.fonts) && this.fonts.length > 0) {
 		this.defaultFontFamily = this.fonts[0].family;
 	}
 };
-GrahaPdfConverter.prototype.setFonts = function(fonts) {
+GrahaConverter.prototype.setFonts = function(fonts) {
 	this.fonts = fonts;
 };
-GrahaPdfConverter.defaultFontFamilyConverter = function(fontFamily, defaultFontFamily) {
-	return GrahaPdfConverterUtility.defaultFontFamilyConverter(fontFamily, defaultFontFamily);
+GrahaConverter.defaultFontFamilyConverter = function(fontFamily, defaultFontFamily) {
+	return GrahaConverterUtility.defaultFontFamilyConverter(fontFamily, defaultFontFamily);
 };
-GrahaPdfConverter.prototype.defaultFonts = function() {
+GrahaConverter.prototype.defaultFonts = function() {
 	var fonts = new Array();
 	fonts.push({
 		family: "Nanum Gothic",
@@ -795,7 +715,7 @@ GrahaPdfConverter.prototype.defaultFonts = function() {
 	});
 	return fonts;
 };
-GrahaPdfConverter.prototype.getBinary = function() {
+GrahaConverter.prototype.getBinary = function() {
 	if(this.binary && this.binary != null) {
 		if(this.binary instanceof Blob) {
 			return this.binary;
@@ -807,14 +727,14 @@ GrahaPdfConverter.prototype.getBinary = function() {
 	}
 	return null;
 };
-GrahaPdfConverter.prototype.downloadable = function() {
+GrahaConverter.prototype.downloadable = function() {
 	var binary = this.getBinary();
 	if(binary != null) {
 		return true;
 	}
 	return false;
 };
-GrahaPdfConverter.prototype.download = function() {
+GrahaConverter.prototype.download = function() {
 	var _this = this;
 	return new Promise(function(resolve, reject) {
 		if(window.navigator && window.navigator.msSaveOrOpenBlob) {
@@ -844,49 +764,36 @@ GrahaPdfConverter.prototype.download = function() {
 		}
 	});
 };
-GrahaPdfConverter.prototype.getWrapperSelector = function() {
+GrahaConverter.prototype.getWrapperSelector = function() {
 	if(this.htmlConverterWrapper && this.htmlConverterWrapper != null) {
 		return this.htmlConverterWrapper.getWrapperSelector();
 	}
 	return null;
 };
-GrahaPdfConverter.prototype.getScaleWrapperSelector = function() {
+GrahaConverter.prototype.getScaleWrapperSelector = function() {
 	if(this.htmlConverterWrapper && this.htmlConverterWrapper != null) {
 		return this.htmlConverterWrapper.getScaleWrapperSelector();
 	}
 	return null;
 };
-GrahaPdfConverter.prototype.applyScale = function(node) {
-	if(this.adjustScale && this.scaleRatio && this.scaleRatio != null && this.scaleRatio < 1) {
-		if(arguments.length > 0) {
-			node.css("transform", "scale(" + this.scaleRatio + ")");
-		} else {
-			$(this.getWrapperSelector()).css("transform", "scale(" + this.scaleRatio + ")");;
-		}
-		var scaleWrapperSelector = this.getScaleWrapperSelector();
-		if(scaleWrapperSelector != null) {
-			var scaledOuterWidth = $(this.htmlElement).outerWidth(true) * this.scaleRatio;
-			$(scaleWrapperSelector).outerWidth(scaledOuterWidth);
-			
-			var scaledOuterHeight = $(this.htmlElement).outerHeight(true) * this.scaleRatio;
-			$(scaleWrapperSelector).outerHeight(scaledOuterHeight);
-		}
+GrahaConverter.prototype.calScaleRatio = function() {
+	var scaleRatio = this.htmlConverterWrapper.calScaleRatio();
+	return this.htmlConverterWrapper.calScaleRatio();
+};
+GrahaConverter.prototype.applyScale = function(scaleRatio) {
+	if(scaleRatio != this.scaleRatio) {
+		this.htmlConverterWrapper.applyScale(scaleRatio);
+		this.scaleRatio = scaleRatio;
 	}
 };
-GrahaPdfConverter.prototype.resetScale = function(node) {
-	if(this.adjustScale && this.scaleRatio && this.scaleRatio != null && this.scaleRatio < 1) {
-		if(arguments.length > 0) {
-			node.css("transform", "scale(1)");
-		} else {
-			$(this.getWrapperSelector()).css("transform", "scale(1)");
-		}
-		var scaleWrapperSelector = this.getScaleWrapperSelector();
-		if(scaleWrapperSelector != null) {
-			var scaledOuterWidth = $(this.htmlElement).outerWidth(true);
-			$(scaleWrapperSelector).outerWidth(scaledOuterWidth);
-			
-			var scaledOuterHeight = $(this.htmlElement).outerHeight(true);
-			$(scaleWrapperSelector).outerHeight(scaledOuterHeight);
-		}
+GrahaConverter.prototype.resetScale = function() {
+	if(this.scaleRatio < 1) {
+		this.htmlConverterWrapper.resetScale();
+		this.scaleRatio = 1;
+	}
+};
+GrahaConverter.prototype.clearAll = function() {
+	if(this.htmlConverterWrapper != null) {
+		this.htmlConverterWrapper.clearAll();
 	}
 };
