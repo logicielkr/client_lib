@@ -63,3 +63,23 @@
 	- 폰트 cdn 을 ```//fonts.googleapis.com/css2``` 로 시작하는 것으로 변경하면, font-stretch (장평) 가 처리되는 것으로 보임.
 	- 장평에 따라 font-size 를 줄이는 코드는 주석으로 막았음.
 	- PDF 변환할 때 사용하는 TrueType 도 같이 변경해야 함.
+
+## 3. 0.7
+
+### 3.1. 0.7.0.0
+
+- GrahaPdfConverter 는 GrahaConverter 로 이름을 변경함.
+- GrahaPdfConverterUtility 는 GrahaConverterUtility 로 이름을 변경함.
+- GrahaConverter, GrahaHwpX2HtmlConverter, GrahaOdt2HtmlConverter 에 options.sourceType 을 추가적인 파라미터로 받는 convert 함수 추가
+
+- [보통의 웹페이지에 GrahaViewer 를 올릴 수 있도록 개선 #6](https://github.com/logicielkr/client_lib/issues/6)
+- [GrahaViewer 에서 pdf 변환기능은 계륵 일 뿐이다. #7](https://github.com/logicielkr/client_lib/issues/7)
+- [GrahaViewer 에서 hwpx 도 scale 적용하고, window.onresize 가 발생하면 scale 변경하도록 수정 #8](https://github.com/logicielkr/client_lib/issues/8)
+- [GrahaViewer 에서 페이지 분리 할 때 table layout 깨지는 경우가 있다. #9](https://github.com/logicielkr/client_lib/issues/9)
+- [GrahaOdtPageSplitter 에서 footer, header 가져올 때 clone() 함수가 정의되지 않았다는 오류 발생 #10](https://github.com/logicielkr/client_lib/issues/10)
+- [GrahaViewer 의 GrahaHwpX2HtmlConverter 에서 HWPUNIT 처리 할 때 마이너스 값 처리 오류 #11](https://github.com/logicielkr/client_lib/issues/11)
+- [GrahaViewer 의 GrahaHwpX2HtmlConverter 에서 출력을 위한 페이지 크기 css 누락 #12](https://github.com/logicielkr/client_lib/issues/12)
+- [GrahaViewer 의 GrahaHwpX2HtmlConverter 에서 쪽번호 처리 중 누락된 부분 있음 #13](https://github.com/logicielkr/client_lib/issues/13)
+- [GrahaViewer 의 GrahaHwpX2HtmlConverter 에서 줄간격(line-height) 적용 방법 변경 #14](https://github.com/logicielkr/client_lib/issues/14)
+- [GrahaViewer 의 GrahaOdt2HtmlConverter 와 GrahaHwpX2HtmlConverter 에서 중복되는 코드가 발견됨 #15](https://github.com/logicielkr/client_lib/issues/15)
+- [GrahaViewer 의 GrahaPdfConverter 에서 중복되는 코드 발견 #16](https://github.com/logicielkr/client_lib/issues/16)

@@ -111,8 +111,8 @@ GrahaOdtPageSplitterUtility.getLastTdNode = function(node, colIndex, colspan) {
 						if(node.childNodes[i].childNodes[x].nodeName == "TD") {
 							var td = node.childNodes[i].childNodes[x];
 							if(
-								colIndex < GrahaPdfConverterUtility.parseInt(td.getAttribute("data-table-cell-index"), 1) + GrahaPdfConverterUtility.parseInt(td.getAttribute("colspan"), 1) &&
-								colIndex + colspan > GrahaPdfConverterUtility.parseInt(td.getAttribute("data-table-cell-index"), 1)
+								colIndex < GrahaConverterUtility.parseInt(td.getAttribute("data-table-cell-index"), 1) + GrahaConverterUtility.parseInt(td.getAttribute("colspan"), 1) &&
+								colIndex + colspan > GrahaConverterUtility.parseInt(td.getAttribute("data-table-cell-index"), 1)
 							) {
 								return td;
 							}
@@ -139,7 +139,7 @@ GrahaOdtPageSplitterUtility.getTdBorder = function(node, last) {
 			style: $(node).css("border-top-style")
 		};
 	}
-	if(GrahaPdfConverterUtility.parseFloat(border.width) > 0 && border.style != "none") {
+	if(GrahaConverterUtility.parseFloat(border.width) > 0 && border.style != "none") {
 		return border;
 	}
 	return null;
@@ -159,8 +159,8 @@ GrahaOdtPageSplitterUtility.copyBorder = function(before, after) {
 				if(firstTrNode.childNodes[i].nodeName == "TD") {
 					var lastTdNode = GrahaOdtPageSplitterUtility.getLastTdNode(
 						before,
-						GrahaPdfConverterUtility.parseInt($(firstTrNode.childNodes[i]).attr("data-table-cell-index"), 1),
-						GrahaPdfConverterUtility.parseInt($(firstTrNode.childNodes[i]).attr("colspan"), 1)
+						GrahaConverterUtility.parseInt($(firstTrNode.childNodes[i]).attr("data-table-cell-index"), 1),
+						GrahaConverterUtility.parseInt($(firstTrNode.childNodes[i]).attr("colspan"), 1)
 					);
 					var border = GrahaOdtPageSplitterUtility.getTdBorder(lastTdNode, true);
 					if(border != null) {
@@ -220,15 +220,37 @@ GrahaOdtPageSplitterUtility.copyBorder = function(before, after) {
 		}
 	}
 };
-GrahaOdtPageSplitterUtility.findNthTdChild = function(node, tableCellIndex) {
+GrahaOdtPageSplitterUtility.findTrNthRightChild = function(node, tableCellIndex, withColspan) {
 	if(node == null) {
 		return null;
 	}
 	for(var i = 0; i < node.childNodes.length; i++) {
 		if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 			if(node.childNodes[i].nodeName == "TD") {
-				var currentTableCellIndex = GrahaPdfConverterUtility.parseInt(node.childNodes[i].getAttribute("data-table-cell-index"), 1);
+				var currentTableCellIndex = GrahaConverterUtility.parseInt(node.childNodes[i].getAttribute("data-table-cell-index"), 1);
+				var colspan = GrahaConverterUtility.parseInt(node.childNodes[i].getAttribute("colspan"), 1);
+				if(currentTableCellIndex >= tableCellIndex) {
+					return node.childNodes[i];
+				} else if(withColspan && currentTableCellIndex + colspan - 1 >= tableCellIndex) {
+					return node.childNodes[i];
+				}
+			}
+		}
+	}
+	return null;
+};
+GrahaOdtPageSplitterUtility.findTrNthChild = function(node, tableCellIndex, withColspan) {
+	if(node == null) {
+		return null;
+	}
+	for(var i = 0; i < node.childNodes.length; i++) {
+		if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
+			if(node.childNodes[i].nodeName == "TD") {
+				var currentTableCellIndex = GrahaConverterUtility.parseInt(node.childNodes[i].getAttribute("data-table-cell-index"), 1);
+				var colspan = GrahaConverterUtility.parseInt(node.childNodes[i].getAttribute("colspan"), 1);
 				if(currentTableCellIndex == tableCellIndex) {
+					return node.childNodes[i];
+				} else if(withColspan && currentTableCellIndex + colspan - 1 == tableCellIndex) {
 					return node.childNodes[i];
 				}
 			}
@@ -297,7 +319,7 @@ GrahaOdtPageSplitterUtility.parentNode = function(node, parentNodeName) {
 GrahaOdtPageSplitterUtility.rowspan = function(node, before) {
 	var countOfCol = 0;
 	if(node.getAttribute("data-hwpx-colcnt") != null) {
-		countOfCol = GrahaPdfConverterUtility.parseInt(node.getAttribute("data-hwpx-colcnt"), 0);
+		countOfCol = GrahaConverterUtility.parseInt(node.getAttribute("data-hwpx-colcnt"), 0);
 	} else {
 		for(var i = 0; i < before.childNodes.length; i++) {
 			if(Node.DOCUMENT_NODE == before.childNodes[i].nodeType || Node.ELEMENT_NODE == before.childNodes[i].nodeType) {
@@ -324,13 +346,13 @@ GrahaOdtPageSplitterUtility.rowspan = function(node, before) {
 	for(var i = 0; i < node.childNodes.length; i++) {
 		if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 			if(node.childNodes[i].nodeName == "TD" || node.childNodes[i].nodeName == "TH") {
-				tableCellIndex = GrahaPdfConverterUtility.parseInt(node.childNodes[i].getAttribute("data-table-cell-index"), 1);
+				tableCellIndex = GrahaConverterUtility.parseInt(node.childNodes[i].getAttribute("data-table-cell-index"), 1);
 				if(tableCellIndex > lastTableCellIndex + 1) {
 					for(var x = (lastTableCellIndex + 1); x < tableCellIndex; x++) {
 						tds.push(x);
 					}
 				}
-				lastTableCellIndex = tableCellIndex + GrahaPdfConverterUtility.parseInt(node.childNodes[i].getAttribute("colspan"), 0);
+				lastTableCellIndex = tableCellIndex + GrahaConverterUtility.parseInt(node.childNodes[i].getAttribute("colspan"), 0);
 			}
 		}
 	}
@@ -365,7 +387,7 @@ GrahaOdtPageSplitterUtility.splitRowspan = function(node, tds, caller) {
 		var td = null;
 		var rowspan = 0;
 		while(td == null && current && current != null && current.length > 0) {
-			td = GrahaOdtPageSplitterUtility.findNthTdChild(current[0], tds[x]);
+			td = GrahaOdtPageSplitterUtility.findTrNthChild(current[0], tds[x], true);
 			if(caller.plusAvailableHeightLimit) {
 				if(rowspan > 0) {
 					var h = caller.plusAvailableHeightLimit(current[0]);
@@ -375,25 +397,25 @@ GrahaOdtPageSplitterUtility.splitRowspan = function(node, tds, caller) {
 			rowspan++;
 		}
 		if(td != null) {
+			if(td.getAttribute("data-graha-splitted") == "true") {
+				continue;
+			}
 			var result = caller.td(td);
 			if(result != null) {
 				if(result.before && result.before != null) {
 					result.before.setAttribute("rowspan", (rowspan - 1));
+					result.before.setAttribute("data-graha-splitted", "true");
 					var after = $(td).clone(true, true);
 					$(td).replaceWith(result.before);
 					requireModifyRowspan.before.push($(result.before));
 					requireModifyRowspan.after.push(after);
-					if(GrahaPdfConverterUtility.parseInt(after.attr("rowspan"), 0) - (rowspan) > 1) {
-						$(after).attr("rowspan", GrahaPdfConverterUtility.parseInt(after.attr("rowspan"), 0) - (rowspan));
+					if(GrahaConverterUtility.parseInt(after.attr("rowspan"), 0) - (rowspan - 1) > 1) {
+						$(after).attr("rowspan", GrahaConverterUtility.parseInt(after.attr("rowspan"), 0) - (rowspan - 1) + 1);
 					} else {
 						$(after).attr("rowspan", null);
 					}
-					if(GrahaPdfConverterUtility.parseInt(after.attr("rowspan"), 0) - (rowspan - 1) > 1) {
-						$(after).attr("rowspan", GrahaPdfConverterUtility.parseInt(after.attr("rowspan"), 0) - (rowspan - 1));
-					} else {
-						$(after).attr("rowspan", null);
-					}
-					var afterTd = GrahaOdtPageSplitterUtility.findNthTdChild(node, tds[x] + GrahaPdfConverterUtility.parseInt(after.attr("colspan"), 1));
+					var afterTd = GrahaOdtPageSplitterUtility.findTrNthRightChild(node, tds[x] + GrahaConverterUtility.parseInt(after.attr("colspan"), 1), false);
+					
 					after.attr("data-graha-splitted", "true");
 					
 					if(afterTd == null) {
@@ -468,13 +490,13 @@ GrahaOdtPageSplitterUtility.modifyRowspan = function(requireModifyRowspan) {
 	if(requireModifyRowspan != null) {
 		for(var x = 0; x < requireModifyRowspan.before.length; x++) {
 			if(requireModifyRowspan.before[x].attr("rowspan") != null) {
-				var rowspan = GrahaPdfConverterUtility.parseInt(requireModifyRowspan.before[x].attr("rowspan"), 0);
+				var rowspan = GrahaConverterUtility.parseInt(requireModifyRowspan.before[x].attr("rowspan"), 0);
 				requireModifyRowspan.before[x].attr("rowspan", rowspan + 1);
 			}
 		}
 		for(var x = 0; x < requireModifyRowspan.after.length; x++) {
 			if(requireModifyRowspan.after[x].attr("rowspan") != null) {
-				var rowspan = GrahaPdfConverterUtility.parseInt(requireModifyRowspan.after[x].attr("rowspan"), 0);
+				var rowspan = GrahaConverterUtility.parseInt(requireModifyRowspan.after[x].attr("rowspan"), 0);
 				if(rowspan - 1 > 1) {
 					requireModifyRowspan.after[x].attr("rowspan", rowspan - 1);
 				} else {

@@ -40,6 +40,7 @@ GrahaHtmlConverterWrapper.prototype.init = function() {
 	this.wrapperTagName = "div";
 	this.wrapperId = "GrahaHtmlConverterWrapper";
 	this.wrapperSelector = this.wrapperTagName + "#" + this.wrapperId;
+	this.wrapperOffsetTop = 45;
 	
 	this.fileWrapperTagName = "div";
 	this.fileWrapperClassName = "GrahaHtmlConverterFileWrapper";
@@ -98,6 +99,10 @@ GrahaHtmlConverterWrapper.prototype.init = function() {
 	this.footnote = null;
 	
 	this.lastPage = null;
+	
+	this.pageWidthPxUnit = null;
+	this.documentBodyWidth = null;
+	this.scaleRatio = 1;
 };
 GrahaHtmlConverterWrapper.prototype.clearAll = function() {
 	$(this.wrapperSelector).remove();
@@ -211,6 +216,9 @@ GrahaHtmlConverterWrapper.prototype.createElement = function(nodeName) {
 		}
 		this.appendChild(other);
 	};
+	node.appendText = function(str) {
+		this.appendChild(document.createTextNode(str));
+	};
 	return node;
 };
 GrahaHtmlConverterWrapper.prototype.getLastFileWrapperElement = function() {
@@ -304,6 +312,32 @@ GrahaHtmlConverterWrapper.prototype.addFootNote = function(footnote) {
 		this.footnote = footnote;
 	}
 };
+GrahaHtmlConverterWrapper.prototype.getRootStyleText = function() {
+	var styleText = "";
+
+	styleText += this.getWrapperSelector() + " {";
+	styleText += "	margin-top: " + (this.wrapperOffsetTop + $("body").outerHeight(true) - $("body").outerHeight(false)) + "px;\n";
+	styleText += "}\n";
+	
+	styleText += "@media print {\n";
+	styleText += "	" + this.getWrapperSelector() + " {";
+	styleText += "		margin-top: " + 0 + "px;\n";
+	styleText += "	}\n";
+	styleText += "}\n";
+	
+	styleText += "body {";
+	styleText += "	margin-top: -" + Math.ceil($("body").outerHeight(true)) + "px;\n";
+	styleText += "}\n";
+
+	return styleText;
+};
+GrahaHtmlConverterWrapper.prototype.getRootStyleNode = function() {
+	var styleNode = this.createElement("style");
+	styleNode.type = "text/css";
+	styleNode.setAttribute("type", "text/css");
+	styleNode.appendText(this.getRootStyleText());
+	return styleNode;
+};
 GrahaHtmlConverterWrapper.prototype.addWrapper = function() {
 	if(this.format == GrahaHtmlConverterWrapper.HWPX_FORMAT) {
 		this.wrapper = this.createElement(this.wrapperTagName);
@@ -311,6 +345,8 @@ GrahaHtmlConverterWrapper.prototype.addWrapper = function() {
 		this.wrapper = document.createElement(this.wrapperTagName);
 	}
 	this.wrapper.setAttribute("id", this.wrapperId);
+	this.appendStyleForWrapper(this.getRootStyleNode());
+	
 	if(this.format == GrahaHtmlConverterWrapper.HWPX_FORMAT) {
 		this.scaleWrapper = this.createElement(this.scaleWrapperTagName);
 	} else {
@@ -367,7 +403,7 @@ GrahaHtmlConverterWrapper.prototype.appendFooter = function(footer) {
 		this.footer = footer;
 	}
 };
-GrahaHtmlConverterWrapper.prototype.getWrapperStyles = function(style) {
+GrahaHtmlConverterWrapper.prototype.getWrapperStyles = function() {
 	return this.wrapperStyles;
 };
 GrahaHtmlConverterWrapper.prototype.appendStyle = function(node, style) {
@@ -509,5 +545,66 @@ GrahaHtmlConverterWrapper.prototype.removeLastHeader = function() {
 GrahaHtmlConverterWrapper.prototype.removeFirstFooter = function() {
 	if(this.getFirstFooter() != null) {
 		$(this.getFirstFooter()).remove();
+	}
+};
+GrahaHtmlConverterWrapper.prototype.applyScale = function(scaleRatio) {
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(scaleRatio == _this.scaleRatio) {
+			resolve(true);
+		} else {
+			window.setTimeout(function() {
+				var scaleWrapper = $(_this.getScaleWrapperSelector());
+				var wrapper = $(_this.getWrapperSelector());
+				
+				var scaledOuterWidth = wrapper.outerWidth(true) * scaleRatio;
+				var scaledOuterHeight = wrapper.outerHeight(true) * scaleRatio;
+				
+				wrapper.css("transform", "scale(" + scaleRatio + ")");
+				if(scaleRatio < 1) {
+					wrapper.css("transform-origin", "left top");
+					if(scaledOuterHeight > 0) {
+						scaleWrapper.outerHeight(scaledOuterHeight);
+					}
+					scaleWrapper.css("overflow", "hidden");
+				} else {
+					wrapper.css("transform-origin", "");
+					scaleWrapper.css("height", "");
+					scaleWrapper.css("overflow", "");
+				}
+				_this.scaleRatio = scaleRatio;
+				
+				var bodyMarginTop = GrahaConverterUtility.parseFloat($("body").css("margin-top"));
+
+				$("body").css("margin-top", bodyMarginTop - (wrapper.offset().top - _this.wrapperOffsetTop));
+				resolve(true);
+			}, 10);
+		}
+	});
+};
+GrahaHtmlConverterWrapper.prototype.calScaleRatio = function(pageWidthPxUnit) {
+	if(pageWidthPxUnit && pageWidthPxUnit != null) {
+		this.pageWidthPxUnit = pageWidthPxUnit;
+	}
+	if(this.pageWidthPxUnit && this.pageWidthPxUnit != null) {
+		this.documentBodyWidth = $(document.body).width();
+		if(this.documentBodyWidth < this.pageWidthPxUnit) {
+			return (this.documentBodyWidth / this.pageWidthPxUnit);
+		}
+		return 1;
+	} else {
+		throw new Error("this.pageWidthPxUnit is empty");
+	}
+};
+GrahaHtmlConverterWrapper.prototype.resetScale = function() {
+	if(this.scaleRatio < 1) {
+		var scaleWrapper = $(this.getScaleWrapperSelector());
+		var wrapper = $(this.getWrapperSelector());
+		wrapper.css("transform", "scale(1)");
+		wrapper.css("transform-origin", "");
+		scaleWrapper.css("height", "");
+		scaleWrapper.css("overflow", "");
+		
+		this.scaleRatio = 1;
 	}
 };

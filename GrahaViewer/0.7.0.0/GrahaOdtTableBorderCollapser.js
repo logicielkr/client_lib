@@ -54,10 +54,10 @@ GrahaOdtTableBorderCollapser.prototype.init = function(options) {
 	this.css = null;
 };
 GrahaOdtTableBorderCollapser.prototype.parseInt = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseInt(str, defaultValue);
+	return GrahaConverterUtility.parseInt(str, defaultValue);
 };
 GrahaOdtTableBorderCollapser.prototype.parseFloat = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseFloat(str, defaultValue);
+	return GrahaConverterUtility.parseFloat(str, defaultValue);
 };
 GrahaOdtTableBorderCollapser.prototype.collapse = function(node) {
 	var _this = this;

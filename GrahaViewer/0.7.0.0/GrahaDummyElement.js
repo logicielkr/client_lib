@@ -38,6 +38,9 @@ function GrahaDummyElement(options) {
 GrahaDummyElement.prototype.appendChild = function(node) {
 	this.elements.push(node);
 };
+GrahaDummyElement.prototype.appendText = function(str) {
+	this.appendChild(document.createTextNode(str));
+};
 GrahaDummyElement.prototype.append = function(node) {
 	this.appendChild(node);
 };

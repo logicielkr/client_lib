@@ -63,10 +63,10 @@ GrahaHwpX2HtmlConverter.prototype.init = function() {
 	this.htmlConverterWrapper = null;
 };
 GrahaHwpX2HtmlConverter.prototype.parseInt = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseInt(str, defaultValue);
+	return GrahaConverterUtility.parseInt(str, defaultValue);
 };
 GrahaHwpX2HtmlConverter.prototype.parseFloat = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseFloat(str, defaultValue);
+	return GrahaConverterUtility.parseFloat(str, defaultValue);
 };
 GrahaHwpX2HtmlConverter.prototype.splitValueAndUnit = function(value) {
 	if(value == null) {
@@ -80,9 +80,9 @@ GrahaHwpX2HtmlConverter.prototype.splitValueAndUnit = function(value) {
 		}
 		return arr;
 	} else {
-		var unit = GrahaPdfConverterUtility.getUnit(value);
+		var unit = GrahaConverterUtility.getUnit(value);
 		if(unit != null) {
-			var v = GrahaPdfConverterUtility.getValueStripUnit(value, unit);
+			var v = GrahaConverterUtility.getValueStripUnit(value, unit);
 			if(v != null) {
 				return [v, unit];
 			}
@@ -130,7 +130,7 @@ GrahaHwpX2HtmlConverter.prototype.convertToHwpUnit = function(value, unit) {
 		if(unit == "HWPUNIT") {
 			return value;
 		} else {
-			return GrahaPdfConverterUtility.convertToPtWithUnit(value, unit) * 100;
+			return GrahaConverterUtility.convertToPtWithUnit(value, unit) * 100;
 		}
 	}
 };
@@ -144,25 +144,19 @@ GrahaHwpX2HtmlConverter.prototype.convertColor = function(value) {
 	}
 	return value;
 };
+GrahaHwpX2HtmlConverter.prototype.convertToPx = function(value, unit) {
+	if(arguments.length == 1) {
+//default : HWPUNIT
+		unit = "HWPUNIT";
+	}
+	return GrahaConverterUtility.convertToPxWithUnit(value, unit);
+};
 GrahaHwpX2HtmlConverter.prototype.convertToPt = function(value, unit) {
 	if(arguments.length == 1) {
 //default : HWPUNIT
-		if(value > 2147483647) {
-			return ((4294965879 - 2147483647) - 2147483649) / 100;
-		} else {
-			return value / 100;
-		}
-	} else {
-		if(unit == "HWPUNIT") {
-			if(value > 2147483647) {
-				return ((4294965879 - 2147483647) - 2147483649) / 100;
-			} else {
-				return value / 100;
-			}
-		} else {
-			return GrahaPdfConverterUtility.convertToPtWithUnit(value, unit);
-		}
+		unit = "HWPUNIT";
 	}
+	return GrahaConverterUtility.convertToPtWithUnit(value, unit);
 };
 GrahaHwpX2HtmlConverter.prototype.fontFamily = function(fontFamily) {
 	if(this.fontFamilyConverter && this.fontFamilyConverter != null) {
@@ -235,31 +229,43 @@ GrahaHwpX2HtmlConverter.prototype.load = function(content, header, sections) {
 GrahaHwpX2HtmlConverter.prototype.loadHwpXFromFile = function(file) {
 	return this.loadHwpXFromBlob(file);
 };
+GrahaHwpX2HtmlConverter.prototype.loadHwpXFromZip = function(zip) {
+	var _this = this;
+	_this.zip = zip;
+	return new Promise(function(resolve, reject) {
+		var tasks = new Array();
+		tasks.push(zip.file("Contents/content.hpf").async("string"));
+		tasks.push(zip.file("Contents/header.xml").async("string"));
+		zip.forEach(function (relativePath, file) {
+			if(file.dir) {
+			} else {
+				if(relativePath.indexOf("Contents/section") == 0) {
+					tasks.push(file.async("string"));
+				}
+			}
+		});
+		Promise.all(tasks).then(function(values) {
+			var content = values[0];
+			var header = values[1];
+			var sections = new Array();
+			for(var i = 2; i < values.length; i++) {
+				sections.push(values[i]);
+			}
+			_this.load(content, header, sections);
+			resolve(values);
+		}).catch(function(error) {
+			console.error(error);
+			reject(error);
+		});
+	});
+};
 GrahaHwpX2HtmlConverter.prototype.loadHwpXFromBlob = function(blob) {
 	this.hwpXBinary = blob;
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.zip = new JSZip();
-		_this.zip.loadAsync(blob).then(function (zip) {
-			var tasks = new Array();
-			tasks.push(zip.file("Contents/content.hpf").async("string"));
-			tasks.push(zip.file("Contents/header.xml").async("string"));
-			zip.forEach(function (relativePath, file) {
-				if(file.dir) {
-				} else {
-					if(relativePath.indexOf("Contents/section") == 0) {
-						tasks.push(file.async("string"));
-					}
-				}
-			});
-			Promise.all(tasks).then(function(values) {
-				var content = values[0];
-				var header = values[1];
-				var sections = new Array();
-				for(var i = 2; i < values.length; i++) {
-					sections.push(values[i]);
-				}
-				_this.load(content, header, sections);
+		var jSZip = new JSZip();
+		jSZip.loadAsync(blob).then(function (zip) {
+			_this.loadHwpXFromZip(zip).then(function (values) {
 				resolve(values);
 			}).catch(function(error) {
 				console.error(error);
@@ -279,8 +285,8 @@ GrahaHwpX2HtmlConverter.prototype.loadHwpXFromUrl = function(url) {
 				console.error(err);
 				reject(err);
 			} else {
-				_this.loadHwpXFromBlob(zipData).then(function(data) {
-					resolve(data);
+				_this.loadHwpXFromBlob(zipData).then(function(values) {
+					resolve(values);
 				}).catch(function(error) {
 					console.error(error);
 					reject(error);
@@ -316,22 +322,88 @@ GrahaHwpX2HtmlConverter.prototype.loadFromUrl = function(contentUrl, headerUrl, 
 		});
 	});
 };
+GrahaHwpX2HtmlConverter.prototype.applyScale = function() {
+	return this.htmlConverterWrapper.applyScale(this.scaleRatio);
+};
+GrahaHwpX2HtmlConverter.prototype.convert = function(source, options) {
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(options && options != null) {
+			if(options.sourceType && options.sourceType != null) {
+				if(source && source != null) {
+					if(options.sourceType == "contentsUrl") {
+						reject("options.sourceType must be [file, blob, zip, url]");
+					} else if(options.sourceType == "contents") {
+						reject("options.sourceType must be [file, blob, zip, url]");
+					} else if(options.sourceType == "file") {
+						_this.convertFromFile(source, options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+					} else if(options.sourceType == "blob") {
+						_this.convertFromBlob(source, options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+					} else if(options.sourceType == "zip") {
+						if(Array.isArray(source) && source.length == 2) {
+							_this.convertFromZip(source[0], source[1], options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+						} else {
+							reject("source must be Array and length is 2");
+						}
+					} else if(options.sourceType == "url") {
+						_this.convertFromUrl(source, options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+					} else {
+						reject("options.sourceType must be [file, blob, zip, url]");
+					}
+				} else {
+					reject("source is empty");
+				}
+			} else {
+				reject("options.sourceType is empty");
+			}
+		} else {
+			reject("options is empty");
+		}
+	});
+};
 GrahaHwpX2HtmlConverter.prototype.convertFromUrl = function(url, options) {
 	return this.convertFromHwpXUrl(url, options);
 };
+GrahaHwpX2HtmlConverter.prototype.handleOptions = function(options) {
+	if(options && options != null) {
+		if(options.defaultFontFamily && options.defaultFontFamily != null) {
+			this.defaultFontFamily = options.defaultFontFamily;
+		}
+		if(options.fontFamilyConverter && options.fontFamilyConverter != null) {
+			this.fontFamilyConverter = options.fontFamilyConverter;
+		}
+		if(options.adjustScale && options.adjustScale != null) {
+			this.adjustScale = options.adjustScale;
+		}
+	}
+};
 GrahaHwpX2HtmlConverter.prototype.convertFromHwpXUrl = function(url, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadHwpXFromUrl(url).then(function(data) {
+		_this.loadHwpXFromUrl(url).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {
@@ -348,18 +420,35 @@ GrahaHwpX2HtmlConverter.prototype.convertFromFile = function(file, options) {
 	return this.convertFromHwpXFile(file, options);
 };
 GrahaHwpX2HtmlConverter.prototype.convertFromHwpXFile = function(file, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadHwpXFromFile(file).then(function(data) {
+		_this.loadHwpXFromFile(file).then(function(values) {
+			_this.prepare().then(function(data) {
+				resolve(data);
+			}).catch(function(error) {
+				console.error(error);
+				reject(error);
+			});
+		}).catch(function(error) {
+			console.error(error);
+			reject(error);
+		});
+	});
+};
+GrahaHwpX2HtmlConverter.prototype.convertFromZip = function(zip, blob, options) {
+	return this.convertFromHwpXZip(zip, blob, options);
+};
+GrahaHwpX2HtmlConverter.prototype.convertFromHwpXZip = function(zip, blob, options) {
+	if(options && options != null) {
+		this.handleOptions(options);
+	}
+	this.hwpXBinary = blob;
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		_this.loadHwpXFromZip(zip).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {
@@ -376,18 +465,12 @@ GrahaHwpX2HtmlConverter.prototype.convertFromBlob = function(blob, options) {
 	return this.convertFromHwpXBlob(blob, options);
 };
 GrahaHwpX2HtmlConverter.prototype.convertFromHwpXBlob = function(blob, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadHwpXFromBlob(blob).then(function(data) {
+		_this.loadHwpXFromBlob(blob).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {
@@ -401,13 +484,13 @@ GrahaHwpX2HtmlConverter.prototype.convertFromHwpXBlob = function(blob, options) 
 	});
 };
 GrahaHwpX2HtmlConverter.prototype.findByTagName = function(node, nodeName) {
-	return GrahaPdfConverterUtility.findByTagName(node, nodeName);
+	return GrahaConverterUtility.findByTagName(node, nodeName);
 };
 GrahaHwpX2HtmlConverter.prototype.getMeta = function() {
 	return this.findByTagName(this.contentXml, "opf:metadata");
 };
 GrahaHwpX2HtmlConverter.prototype.getNodeValue = function(node) {
-	return GrahaPdfConverterUtility.getNodeValue(node);
+	return GrahaConverterUtility.getNodeValue(node);
 };
 GrahaHwpX2HtmlConverter.prototype.getPdfProperties = function() {
 	var node = this.getMeta();
@@ -426,6 +509,8 @@ GrahaHwpX2HtmlConverter.prototype.getPdfProperties = function() {
 					if(node.childNodes[i].getAttribute("name") == "CreatedDate") {
 					} else if(node.childNodes[i].getAttribute("name") == "ModifiedDate") {
 //Nothing
+					} else if(node.childNodes[i].getAttribute("name") == "date") {
+					} else if(node.childNodes[i].getAttribute("name") == "lastsaveby") {
 					} else if(node.childNodes[i].getAttribute("name") == "creator") {
 						var nodeValue = this.getNodeValue(node.childNodes[i]);
 						if(nodeValue && nodeValue != null) {
@@ -1625,10 +1710,11 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromBorderFill = function(bo
 	}
 	return null;
 };
-GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharProperty = function(charProperty) {
+GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharProperty = function(charProperty, paraProperty) {
+	var properties = null;
+	var fontSize = 0;
 	if(charProperty != null) {
-		var properties = new GrahaCSSProperties();
-		var fontSize = 0;
+		properties = new GrahaCSSProperties();
 		if(charProperty.height && charProperty.height != null) {
 			fontSize = this.convertToPt(charProperty.height);
 			properties.push("font-size", fontSize, "pt");
@@ -1685,9 +1771,44 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharProperty = function(
 			properties.replace("vertical-align", "super");
 			properties.replace("font-size", fontSize * this.superscriptRatio, "pt");
 		}
-		return properties;
 	}
-	return null;
+	if(paraProperty != null) {
+		if(properties == null) {
+			properties = new GrahaCSSProperties();
+		}
+		if(paraProperty.lineSpacing && paraProperty.lineSpacing != null) {
+			if(
+				paraProperty.lineSpacing.type &&
+				paraProperty.lineSpacing.type != null &&
+				paraProperty.lineSpacing.value &&
+				paraProperty.lineSpacing.value != null
+			) {
+				if(paraProperty.lineSpacing.type == "PERCENT") {
+					properties.push("line-height", paraProperty.lineSpacing.value, "%");
+				} else if(
+					paraProperty.lineSpacing.type == "FIXED" ||
+					paraProperty.lineSpacing.type == "AT_LEAST"
+				) {
+					properties.push("line-height", this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit), "pt");
+				} else if(paraProperty.lineSpacing.type == "BETWEEN_LINES") {
+					if(fontSize > 0) {
+						properties.push("line-height", maximumCharHeight + this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit), "pt");
+					} else {
+						properties.push("line-height", "calc(100% + " + this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit) + "pt)");
+						console.error("maximumCharHeight is missing", paraProperty.lineSpacing.type);
+					}
+//테스트가 완료되면 지워야 한다.
+//Nothing 글자크기를 알 수 있게 된 후에 계산하여 처리한다.
+//					properties.push("line-height", "calc(100% + " + this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit) + "pt)");
+				} else {
+					console.error(paraProperty.lineSpacing);
+				}
+			} else {
+				console.error(paraProperty.lineSpacing);
+			}
+		}
+	}
+	return properties;
 };
 /*
 GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromTabProperty = function(tabProperty) {
@@ -1724,30 +1845,6 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromParaProperty = function(
 				} else {
 					console.error(paraProperty.breakSetting.breakNonLatinWord);
 				}
-			}
-		}
-		if(paraProperty.lineSpacing && paraProperty.lineSpacing != null) {
-			if(
-				paraProperty.lineSpacing.type &&
-				paraProperty.lineSpacing.type != null &&
-				paraProperty.lineSpacing.value &&
-				paraProperty.lineSpacing.value != null
-			) {
-				if(paraProperty.lineSpacing.type == "PERCENT") {
-					properties.push("line-height", paraProperty.lineSpacing.value, "%");
-				} else if(
-					paraProperty.lineSpacing.type == "FIXED" ||
-					paraProperty.lineSpacing.type == "AT_LEAST"
-				) {
-					properties.push("line-height", this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit), "pt");
-				} else if(paraProperty.lineSpacing.type == "BETWEEN_LINES") {
-//Nothing 글자크기를 알 수 있게 된 후에 계산하여 처리한다.
-//					properties.push("line-height", "calc(100% + " + this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit) + "pt)");
-				} else {
-					console.error(paraProperty.lineSpacing);
-				}
-			} else {
-				console.error(paraProperty.lineSpacing);
 			}
 		}
 		var ignoreMargin = 0;
@@ -1860,13 +1957,9 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromParaProperty = function(
 GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromStyle = function(style) {
 	if(style != null) {
 		var paraProperties = null;
-		if(style.paraPrIDRef && style.paraPrIDRef != null) {
-			paraProperties = this.getStylePropertiesFromParaPropertyId(style.paraPrIDRef);
-		}
+		paraProperties = this.getStylePropertiesFromParaPropertyId(style.paraPrIDRef);
 		var charProperties = null;
-		if(style.charPrIDRef && style.charPrIDRef != null) {
-			charProperties = this.getStylePropertiesFromCharPropertyId(style.charPrIDRef);
-		}
+		charProperties = this.getStylePropertiesFromCharPropertyId(style.charPrIDRef, style.paraPrIDRef);
 		return {
 			paraProperties: paraProperties,
 			charProperties: charProperties
@@ -1882,8 +1975,8 @@ GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromFontfaceId = function(id
 GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromBorderFillId = function(id) {
 	return this.getStylePropertiesFromBorderFill(this.getBorderFill(id));
 };
-GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharPropertyId = function(id) {
-	return this.getStylePropertiesFromCharProperty(this.getCharProperty(id));
+GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromCharPropertyId = function(charPrIDRef, paraPrIDRef) {
+	return this.getStylePropertiesFromCharProperty(this.getCharProperty(charPrIDRef), this.getParaProperty(paraPrIDRef));
 };
 /*
 GrahaHwpX2HtmlConverter.prototype.getStylePropertiesFromTabPropertyId = function(id) {
@@ -1913,11 +2006,7 @@ GrahaHwpX2HtmlConverter.prototype.sections = function() {
 		this.pageSplitter = new GrahaHwpXPageSplitter({
 			grahaPageInnerSectionClassName: this.htmlConverterWrapper.getPageInnerSectionClassName()
 		});
-		var styleNode = this.createElement("style");
-		styleNode.type = "text/css";
-		styleNode.setAttribute("type", "text/css");
-		styleNode.append(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " p {margin: 0;z-index: 1;}"));
-		this.htmlConverterWrapper.appendStyleForWrapper(styleNode);
+		
 		for(var i = 0; i < this.sectionXmls.length; i++) {
 			this.section(this.sectionXmls[i]);
 		}
@@ -1925,6 +2014,15 @@ GrahaHwpX2HtmlConverter.prototype.sections = function() {
 			this.boderCollapser.collapse(this.htmlConverterWrapper.getLastPage());
 		}
 		this.htmlConverterWrapper.rewidthLastFileWrapperElement();
+		var styleNode = this.createElement("style");
+		styleNode.type = "text/css";
+		styleNode.setAttribute("type", "text/css");
+		if(this.pageProperties.landscape == "WIDELY") {
+			styleNode.appendText("@page {size: " + (this.pageProperties.width/100) + "pt " + (this.pageProperties.height/100) + "pt;}");
+		} else {
+			styleNode.appendText("@page {size: " + (this.pageProperties.height/100) + "pt " + (this.pageProperties.width/100) + "pt;}");
+		}
+		this.htmlConverterWrapper.appendStyleForWrapper(styleNode);
 		return this.htmlConverterWrapper.getHtmlElement();
 	}
 };
@@ -2233,7 +2331,7 @@ GrahaHwpX2HtmlConverter.prototype.setPageHeaderAndFooterAndPagerNumber = functio
 					this.appendText(pageNumber.sideChar, font);
 				}
 				if(pageNumber.formatType == "DIGIT") {
-					font.append(document.createTextNode(this.relativePageNumber));
+					font.appendText(this.relativePageNumber);
 				}
 				if(pageNumber.sideChar && pageNumber.sideChar != null) {
 					this.appendText(pageNumber.sideChar, font);
@@ -2504,10 +2602,12 @@ GrahaHwpX2HtmlConverter.prototype.tc = function(node, parentElement, cellStyle, 
 							colspan = this.parseInt(attributes.item(x).value);
 							if(colspan > 1) {
 								td.setAttribute("colspan", attributes.item(x).value);
+								td.setAttribute("data-init-colspan", attributes.item(x).value);
 							}
 						} else if(attributes.item(x).name == "rowSpan") {
 							if(this.parseInt(attributes.item(x).value) > 1) {
 								td.setAttribute("rowspan", attributes.item(x).value);
+								td.setAttribute("data-init-rowspan", attributes.item(x).value);
 							}
 						} else {
 							console.error(attributes.item(x));
@@ -2528,21 +2628,29 @@ GrahaHwpX2HtmlConverter.prototype.tc = function(node, parentElement, cellStyle, 
 							console.error(attributes.item(x));
 						}
 					}
-				} else if(hasMargin != "0" && node.childNodes[i].nodeName == "hp:cellMargin") {
+				} else if(node.childNodes[i].nodeName == "hp:cellMargin") {
 					attributes = node.childNodes[i].attributes;
 					for(var x = 0; x < attributes.length; x++) {
 						if(attributes.item(x).name == "left") {
 							td.setAttribute("data-hwpx-cellMargin-" + attributes.item(x).name, attributes.item(x).value);
-							cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							if(hasMargin != "0") {
+								cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							}
 						} else if(attributes.item(x).name == "right") {
 							td.setAttribute("data-hwpx-cellMargin-" + attributes.item(x).name, attributes.item(x).value);
-							cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							if(hasMargin != "0") {
+								cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							}
 						} else if(attributes.item(x).name == "top") {
 							td.setAttribute("data-hwpx-cellMargin-" + attributes.item(x).name, attributes.item(x).value);
-							cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							if(hasMargin != "0") {
+								cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							}
 						} else if(attributes.item(x).name == "bottom") {
 							td.setAttribute("data-hwpx-cellMargin-" + attributes.item(x).name, attributes.item(x).value);
-							cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							if(hasMargin != "0") {
+								cellStyle.replace("padding-" + attributes.item(x).name, this.convertToPt(attributes.item(x).value), "pt");
+							}
 						} else {
 							console.error(attributes.item(x));
 						}
@@ -2745,6 +2853,11 @@ GrahaHwpX2HtmlConverter.prototype.tbl = function(node, parentElement) {
 				table.setAttribute("data-hwpx-" + attributes.item(x).name, attributes.item(x).value);
 			} else if(attributes.item(x).name == "sizeAuto") {
 				table.setAttribute("data-hwpx-" + attributes.item(x).name, attributes.item(x).value);
+			} else if(attributes.item(x).name == "dropcapstyle") {
+				table.setAttribute("data-hwpx-" + attributes.item(x).name, attributes.item(x).value);
+				if(attributes.item(x).value != "None") {
+					console.error(attributes.item(x));
+				}
 			} else {
 				console.error(attributes.item(x));
 			}
@@ -2881,7 +2994,12 @@ GrahaHwpX2HtmlConverter.prototype.tbl = function(node, parentElement) {
 				}
 				var prevTable = parentElement.last(false);
 				if(prevTable && prevTable != null) {
-					var prevLeft = this.splitValueAndUnit($(prevTable).css("left"));
+					var prevLeft = null;
+					if($(prevTable).css("left") == "auto") {
+						prevLeft = 0;
+					} else {
+						prevLeft = this.splitValueAndUnit($(prevTable).css("left"));
+					}
 					var prevWidth = this.splitValueAndUnit($(prevTable).css("width"));
 					if(prevLeft != null && prevLeft.length == 2 && prevLeft[1] == "pt") {
 						horzOffset -= this.convertToHwpUnit(prevLeft[0]);
@@ -3264,7 +3382,7 @@ GrahaHwpX2HtmlConverter.prototype.setPageLayout = function() {
 		throw new Error("page width or height is null or undefined");
 	}
 	style.push("background-color", "white");
-	style.push("margin-bottom", "10px");
+
 	var innerStyle = new GrahaCSSProperties();
 	var pageHeaderStyle = new GrahaCSSProperties();
 	var pageFooterStyle = new GrahaCSSProperties();
@@ -3388,6 +3506,10 @@ GrahaHwpX2HtmlConverter.prototype.footNotePr = function(node) {
 							noteLayout.autoNumFormat.type = attributes.item(x).value;
 						} else if(attributes.item(x).name == "suffixChar") {
 							noteLayout.autoNumFormat.suffixChar = attributes.item(x).value;
+						} else if(attributes.item(x).name == "prefixChar") {
+							noteLayout.autoNumFormat.prefixChar = attributes.item(x).value;
+						} else if(attributes.item(x).name == "userChar") {
+							noteLayout.autoNumFormat.userChar = attributes.item(x).value;
 						} else if(attributes.item(x).name == "supscript") {
 							noteLayout.autoNumFormat.supscript = attributes.item(x).value;
 						} else {
@@ -3694,9 +3816,20 @@ INSIDE_BOTTOM	OUTSIDE_BOTTOM
 						if(parentElement && parentElement != null) {
 							var span = this.createElement("span");
 							span.setAttribute("style", "vertical-align:super;font-size: 58%;");
-							this.appendText(currentAutoNum.num, span);
-							if(currentAutoNum.autoNumFormat && currentAutoNum.autoNumFormat != null && currentAutoNum.autoNumFormat.suffixChar && currentAutoNum.autoNumFormat.suffixChar != null) {
-								this.appendText(currentAutoNum.autoNumFormat.suffixChar, span);
+							if(currentAutoNum.autoNumFormat && currentAutoNum.autoNumFormat != null) {
+								if(currentAutoNum.autoNumFormat.prefixChar && currentAutoNum.autoNumFormat.prefixChar != null) {
+									this.appendText(currentAutoNum.autoNumFormat.prefixChar, span);
+								}
+							}
+							if(currentAutoNum.autoNumFormat && currentAutoNum.autoNumFormat != null && currentAutoNum.autoNumFormat.userChar && currentAutoNum.autoNumFormat.userChar != null) {
+								this.appendText(currentAutoNum.autoNumFormat.userChar, span);
+							} else {
+								this.appendText(currentAutoNum.num, span);
+							}
+							if(currentAutoNum.autoNumFormat && currentAutoNum.autoNumFormat != null) {
+								if(currentAutoNum.autoNumFormat.suffixChar && currentAutoNum.autoNumFormat.suffixChar != null) {
+									this.appendText(currentAutoNum.autoNumFormat.suffixChar, span);
+								}
 							}
 							parentElement.append(span);
 						}
@@ -3805,9 +3938,20 @@ INSIDE_BOTTOM	OUTSIDE_BOTTOM
 								this.appendText(autoNum.num, span);
 								parentElement.append(span);
 							} else {
-								this.appendText(autoNum.num, parentElement);
-								if(autoNum.autoNumFormat && autoNum.autoNumFormat != null && autoNum.autoNumFormat.suffixChar && autoNum.autoNumFormat.suffixChar != null) {
-									this.appendText(autoNum.autoNumFormat.suffixChar, parentElement);
+								if(autoNum.autoNumFormat && autoNum.autoNumFormat != null) {
+									if(autoNum.autoNumFormat.prefixChar && autoNum.autoNumFormat.prefixChar != null) {
+										this.appendText(autoNum.autoNumFormat.prefixChar, parentElement);
+									}
+								}
+								if(autoNum.autoNumFormat && autoNum.autoNumFormat != null && autoNum.autoNumFormat.userChar && autoNum.autoNumFormat.userChar != null) {
+									this.appendText(autoNum.autoNumFormat.userChar, parentElement);
+								} else {
+									this.appendText(autoNum.num, parentElement);
+								}
+								if(autoNum.autoNumFormat && autoNum.autoNumFormat != null) {
+									if(autoNum.autoNumFormat.suffixChar && autoNum.autoNumFormat.suffixChar != null) {
+										this.appendText(autoNum.autoNumFormat.suffixChar, parentElement);
+									}
 								}
 							}
 						}
@@ -3931,7 +4075,7 @@ GrahaHwpX2HtmlConverter.prototype.run = function(node, parentElement, paraProper
 							charHeight = charProperty.height;
 						}
 					}
-					style = this.getStylePropertiesFromCharProperty(charProperty);
+					style = this.getStylePropertiesFromCharProperty(charProperty, paraProperty);
 				}
 			} else {
 				console.error(attributes.item(x));
@@ -3998,11 +4142,15 @@ GrahaHwpX2HtmlConverter.prototype.run = function(node, parentElement, paraProper
 			}
 		} else {
 //			font.append(document.createTextNode('\u0020'));
-			font.append(document.createTextNode('\u180E'));
+//			font.append(document.createTextNode('\u180E'));
+			font.appendText('\u180E');
 			existsSpan = true;
 		}
 		if(existsSpan) {
-			return charHeight;
+			return {
+				charHeight: charHeight,
+				lineHeightProperty: style.getProperty("line-height")
+			};
 		}
 	}
 	return null;
@@ -4080,10 +4228,20 @@ GrahaHwpX2HtmlConverter.prototype.paragraph = function(node, parentElement) {
 		}
 		parentElement.append(paragraph);
 		var isFirstRun = true;
+		var lineHeightProperty = null;
 		for(var i = 0; i < node.childNodes.length; i++) {
 			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
 				if(node.childNodes[i].nodeName == "hp:run") {
-					var charHeight = this.run(node.childNodes[i], paragraph, paraProperty, isFirstRun);
+					var charHeightProperty = this.run(node.childNodes[i], paragraph, paraProperty, isFirstRun);
+					var charHeight = null;
+					if(charHeightProperty != null) {
+						if(charHeightProperty.charHeight && charHeightProperty.charHeight != null) {
+							charHeight = charHeightProperty.charHeight;
+						}
+						if(charHeightProperty.lineHeightProperty && charHeightProperty.lineHeightProperty != null) {
+							lineHeightProperty = charHeightProperty.lineHeightProperty;
+						}
+					}
 					isFirstRun = false;
 					if(charHeight != null) {
 						if(maximumCharHeight == null) {
@@ -4100,16 +4258,7 @@ GrahaHwpX2HtmlConverter.prototype.paragraph = function(node, parentElement) {
 				console.error(node.childNodes[i]);
 			}
 		}
-		/*
-		this.rtrim(paragraph);
-		if(paraProperty.align && paraProperty.align != null) {
-			if(paraProperty.align.horizontal && paraProperty.align.horizontal != null) {
-				if(paraProperty.align.horizontal == "RIGHT") {
-					this.ltrim(paragraph);
-				}
-			}
-		}
-		*/
+
 		if(paraProperty != null) {
 			var style = this.getStylePropertiesFromParaProperty(paraProperty);
 			
@@ -4121,21 +4270,6 @@ GrahaHwpX2HtmlConverter.prototype.paragraph = function(node, parentElement) {
 				style.push("clear", "both");
 			}
 			
-			if(paraProperty.lineSpacing && paraProperty.lineSpacing != null) {
-				if(paraProperty.lineSpacing.type && paraProperty.lineSpacing.type != null) {
-					if(paraProperty.lineSpacing.type == "BETWEEN_LINES") {
-						if(maximumCharHeight != null) {
-							style.push("line-height", maximumCharHeight + this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit), "pt");
-						} else {
-							if(style == null) {
-								style = new GrahaCSSProperties();
-							}
-							style.push("line-height", "calc(100% + " + this.convertToPt(paraProperty.lineSpacing.value, paraProperty.lineSpacing.unit) + "pt)");
-							console.error("maximumCharHeight is missing", paraProperty.lineSpacing.type);
-						}
-					}
-				}
-			}
 			if(paraProperty.heading && paraProperty.heading != null) {
 				if(paraProperty.heading.type && paraProperty.heading.type != null) {
 					if(paraProperty.heading.type == "OUTLINE" || paraProperty.heading.type == "NUMBER") {
@@ -4154,31 +4288,33 @@ GrahaHwpX2HtmlConverter.prototype.paragraph = function(node, parentElement) {
 					}
 				}
 			}
-			if(style != null && style.valid()) {
-				var lineHeightProperty = style.getProperty("line-height");
-				if(lineHeightProperty != null) {
-					var lineHeight = null;
-					if(lineHeightProperty.unit != null) {
-						if(lineHeightProperty.unit == "%") {
-							if(maximumCharHeight != null) {
-								lineHeight = this.convertToPt(maximumCharHeight) * this.parseInt(lineHeightProperty.value) / 100;
-							}
-						} else {
-							lineHeight = this.convertToPt(lineHeightProperty.value, lineHeightProperty.unit);
+			if(lineHeightProperty != null) {
+				var lineHeight = null;
+				if(lineHeightProperty.unit != null) {
+					if(lineHeightProperty.unit == "%") {
+						if(maximumCharHeight != null) {
+							lineHeight = this.convertToPt(maximumCharHeight) * this.parseInt(lineHeightProperty.value) / 100;
 						}
-					}
-					if(lineHeight != null && maximumCharHeight != null) {
-//HTML 의 줄간격과 [한/글] 의 줄간격이 표시되는 방법이 다르다.  HTML 은 middle 에 [한/글] 은 top 에 글자가 배치된다.
-						var marginTop = lineHeight - this.convertToPt(maximumCharHeight);
-						marginTop = marginTop / 2;
-						style.plus("margin-top", -marginTop, "pt");
-						if(parentElement.nodeName == "P" && parentElement.getAttribute("data-vertical-align") != null) {
-							style.plus("margin-bottom", -marginTop, "pt");
-						} else {
-							style.plus("margin-bottom", marginTop, "pt");
-						}
+					} else {
+						lineHeight = this.convertToPt(lineHeightProperty.value, lineHeightProperty.unit);
 					}
 				}
+				if(lineHeight != null && maximumCharHeight != null) {
+//HTML 의 줄간격과 [한/글] 의 줄간격이 표시되는 방법이 다르다.  HTML 은 middle 에 [한/글] 은 top 에 글자가 배치된다.
+					var marginTop = lineHeight - this.convertToPt(maximumCharHeight);
+					marginTop = marginTop / 2;
+					if(style == null) {
+						style = new GrahaCSSProperties();
+					}
+					style.plus("margin-top", -marginTop, "pt");
+					if(parentElement.nodeName == "P" && parentElement.getAttribute("data-vertical-align") != null) {
+						style.plus("margin-bottom", -marginTop, "pt");
+					} else {
+						style.plus("margin-bottom", marginTop, "pt");
+					}
+				}
+			}
+			if(style != null && style.valid()) {
 				paragraph.setAttribute("style", style.toString(false));
 			}
 		}
@@ -4204,6 +4340,12 @@ GrahaHwpX2HtmlConverter.prototype.prepare = function() {
 			var htmlElement = _this.sections();
 			var pageLayout = _this.getPageLayout();
 			if(pageLayout != null) {
+				if(_this.adjustScale) {
+					if(pageLayout.pageWidth != null) {
+						var pageWidthPxUnit = _this.convertToPx(pageLayout.pageWidth);
+						_this.scaleRatio = _this.htmlConverterWrapper.calScaleRatio(pageWidthPxUnit);
+					}
+				}
 				if(pageLayout.pageWidth && pageLayout.pageWidth != null) {
 					pageLayout.pageWidth = _this.convertToPt(pageLayout.pageWidth) + "pt";
 				}
@@ -4211,15 +4353,17 @@ GrahaHwpX2HtmlConverter.prototype.prepare = function() {
 					pageLayout.pageHeight = _this.convertToPt(pageLayout.pageHeight) + "pt";
 				}
 			}
-			resolve({
-				htmlElement: htmlElement,
-				pdfProperties: _this.pdfProperties,
-				htmlConverterWrapper: _this.htmlConverterWrapper,
-				pageLayout: pageLayout,
-				binary: _this.hwpXBinary,
-				overflow: _this.overflow,
-				scaleRatio: _this.scaleRatio
-			});
+			_this.applyScale().then(function() {
+				resolve({
+					htmlElement: htmlElement,
+					pdfProperties: _this.pdfProperties,
+					htmlConverterWrapper: _this.htmlConverterWrapper,
+					pageLayout: pageLayout,
+					binary: _this.hwpXBinary,
+					overflow: _this.overflow,
+					scaleRatio: _this.scaleRatio
+				});
+			}).catch(function(error) {reject(error);});
 		}, 10);
 	});
 };

@@ -44,52 +44,52 @@ GrahaOdt2HtmlConverter.prototype.init = function() {
 	this.htmlConverterWrapper = null;
 };
 GrahaOdt2HtmlConverter.prototype.parseInt = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseInt(str, defaultValue);
+	return GrahaConverterUtility.parseInt(str, defaultValue);
 };
 GrahaOdt2HtmlConverter.prototype.parseFloat = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseFloat(str, defaultValue);
+	return GrahaConverterUtility.parseFloat(str, defaultValue);
 };
 GrahaOdt2HtmlConverter.prototype.positionBottomWithMargin = function(node) {
-	return GrahaPdfConverterUtility.positionBottomWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.positionBottomWithMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetRightWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetRightWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetRightWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.outerWidthWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.outerWidthWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.outerWidthWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetRightWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetRightWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetRightWithMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetLeftWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetLeftWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetLeftWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetLeftWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetLeftWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetLeftWithMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetTopWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetTopWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetTopWithMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.positionLeftWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.positionLeftWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.positionLeftWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.positionTopWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.positionTopWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.positionTopWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.outerWidthWithMargin = function(node) {
-	return GrahaPdfConverterUtility.outerWidthWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.outerWidthWithMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.height = function(node) {
-	return GrahaPdfConverterUtility.height(node, this.scaleRatio);
+	return GrahaConverterUtility.height(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.outerHeightWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.outerHeightWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.outerHeightWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetTopWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetTopWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetTopWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.offsetBottomWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetBottomWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetBottomWithMargin(node, this.scaleRatio);
 };
 GrahaOdt2HtmlConverter.prototype.parseFromStringForIE = function(str) {
 	try {
@@ -120,14 +120,26 @@ GrahaOdt2HtmlConverter.prototype.load = function(meta, header, content) {
 GrahaOdt2HtmlConverter.prototype.loadOdtFromFile = function(file) {
 	return this.loadOdtFromBlob(file);
 };
+GrahaOdt2HtmlConverter.prototype.loadOdtFromZip = function(zip) {
+	var _this = this;
+	_this.zip = zip;
+	return new Promise(function(resolve, reject) {
+		Promise.all([zip.file("meta.xml").async("string"), zip.file("styles.xml").async("string"), zip.file("content.xml").async("string")]).then(function(values) {
+			_this.load(values[0], values[1], values[2]);
+			resolve(values);
+		}).catch(function(error) {
+			console.error(error);
+			reject(error);
+		});
+	});
+};
 GrahaOdt2HtmlConverter.prototype.loadOdtFromBlob = function(blob) {
 	this.odtBinary = blob;
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.zip = new JSZip();
-		_this.zip.loadAsync(blob).then(function (zip) {
-			Promise.all([zip.file("meta.xml").async("string"), zip.file("styles.xml").async("string"), zip.file("content.xml").async("string")]).then(function(values) {
-				_this.load(values[0], values[1], values[2]);
+		var jSZip = new JSZip();
+		jSZip.loadAsync(blob).then(function (zip) {
+			_this.loadOdtFromZip(zip).then(function (values) {
 				resolve(values);
 			}).catch(function(error) {
 				console.error(error);
@@ -193,10 +205,10 @@ GrahaOdt2HtmlConverter.prototype.loadXmlFromUrl = function(url) {
 	});
 };
 GrahaOdt2HtmlConverter.prototype.findByTagName = function(node, nodeName) {
-	return GrahaPdfConverterUtility.findByTagName(node, nodeName);
+	return GrahaConverterUtility.findByTagName(node, nodeName);
 };
 GrahaOdt2HtmlConverter.prototype.toCSSObject = function(name, value) {
-	return GrahaPdfConverterUtility.toCSSObject(name, value);
+	return GrahaConverterUtility.toCSSObject(name, value);
 };
 GrahaOdt2HtmlConverter.prototype.toCSSSelector = function(typeSelector, classSelector) {
 	return {
@@ -1266,13 +1278,8 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 					this.pageLayout.marginRight = masterPageRule.rule[i].value;
 				}
 			}
-			if(this.pageLayout.pageOrientation == "portrait") {
-				cssStyleRule += "\twidth: " + this.pageLayout.pageWidth + ";\n";
-				cssStyleRule += "\theight: " + this.pageLayout.pageHeight + ";\n";
-			} else {
-				cssStyleRule += "\theight: " + this.pageLayout.pageWidth + ";\n";
-				cssStyleRule += "\twidth: " + this.pageLayout.pageHeight + ";\n";
-			}
+			cssStyleRule += "\twidth: " + this.pageLayout.pageWidth + ";\n";
+
 			cssStyleRule += "\tbox-sizing: border-box;\n";
 			if(this.defaultFontFamily && this.defaultFontFamily != null) {
 				cssStyleRule += "\tfont-family: " + this.defaultFontFamily + ";\n";
@@ -1282,7 +1289,10 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			
 			var cssStyleEntirePageRule = this.htmlConverterWrapper.getEntirePageStyleSelector() + " {\n";
 			cssStyleEntirePageRule += "\tbox-sizing: border-box;\n";
-			cssStyleEntirePageRule += "\tmargin: 0;\n";
+			cssStyleEntirePageRule += "\tmargin-top: 0;\n";
+			cssStyleEntirePageRule += "\tmargin-left: 0;\n";
+			cssStyleEntirePageRule += "\tmargin-right: 0;\n";
+
 			cssStyleEntirePageRule += "\tposition: relative;\n";
 			cssStyleEntirePageRule += "\tbackground-color: white;\n";
 			
@@ -1310,14 +1320,11 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			var cssStylePageTemplateRule = this.htmlConverterWrapper.getPageStyleSelector() + " {\n";
 			cssStylePageTemplateRule += "\tbox-sizing: border-box;\n";
 			cssStylePageTemplateRule += "\tposition: relative;\n";
-			cssStylePageTemplateRule += "\tmargin-bottom: 10px;\n";
+
 			cssStylePageTemplateRule += "\tbackground-color: white;\n";
 			if(this.pageLayout.pageWidth != null) {
-				if(this.pageLayout.pageOrientation == "portrait") { 
-					styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageWidth + " " + this.pageLayout.pageHeight + ";}\n"));
-				} else {
-					styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageHeight + " " + this.pageLayout.pageWidth + ";}\n"));
-				}
+				styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageWidth + " " + this.pageLayout.pageHeight + ";}\n"));
+
 				var unit = this.getUnit(this.pageLayout.pageWidth);
 				if(unit != null) {
 					var pageWidth = this.parseFloat(this.getValueStripUnit(this.pageLayout.pageWidth, unit), 0);
@@ -1376,26 +1383,39 @@ GrahaOdt2HtmlConverter.prototype.getBody = function() {
 };
 GrahaOdt2HtmlConverter.prototype.body = function() {
 	var node = this.getBody();
-	if(node != null) {
-		for(var i = 0; i < node.childNodes.length; i++) {
-			if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
-				if(node.childNodes[i].nodeName == "office:text") {
-					if(this.htmlConverterWrapper == null) {
-						this.htmlConverterWrapper = new GrahaHtmlConverterWrapper(GrahaHtmlConverterWrapper.ODT_FORMAT);
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(node != null) {
+			var exists = false;
+			for(var i = 0; i < node.childNodes.length; i++) {
+				if(Node.DOCUMENT_NODE == node.childNodes[i].nodeType || Node.ELEMENT_NODE == node.childNodes[i].nodeType) {
+					if(node.childNodes[i].nodeName == "office:text") {
+						exists = true;
+						if(_this.htmlConverterWrapper == null) {
+							_this.htmlConverterWrapper = new GrahaHtmlConverterWrapper(GrahaHtmlConverterWrapper.ODT_FORMAT);
+						}
+						_this.htmlConverterWrapper.addFile();
+						_this.htmlConverterWrapper.appendStyleForWrapper(_this.style());
+						_this.styleNode = _this.style(_this.htmlConverterWrapper.getLastFileWrapperSelector());
+						_this.htmlConverterWrapper.appendStyleForLastFileWrapper(_this.styleNode);
+						var currentNode = node.childNodes[i];
+						window.setTimeout(function() {
+							var page = _this.htmlConverterWrapper.createEntirePageElement();
+							_this.htmlConverterWrapper.addEntirePage(page);
+							_this.text(currentNode, page);
+							_this.htmlConverterWrapper.addFootNote(_this.footnote);
+							resolve(_this.htmlConverterWrapper.getHtmlElement());
+						}, 10);
 					}
-					this.htmlConverterWrapper.addFile();
-					this.htmlConverterWrapper.appendStyleForWrapper(this.style());
-					this.styleNode = this.style(this.htmlConverterWrapper.getLastFileWrapperSelector());
-					this.htmlConverterWrapper.appendStyleForLastFileWrapper(this.styleNode);
-					var page = this.htmlConverterWrapper.createEntirePageElement();
-					this.htmlConverterWrapper.addEntirePage(page);
-					this.text(node.childNodes[i], page);
-					this.htmlConverterWrapper.addFootNote(this.footnote);
-					return this.htmlConverterWrapper.getHtmlElement();
 				}
 			}
+			if(!exists) {
+				reject("this.getBody() :: office:text is null");
+			}
+		} else {
+			reject("this.getBody() is null");
 		}
-	}
+	});
 };
 GrahaOdt2HtmlConverter.prototype.td = function(node, element) {
 	if(node != null) {
@@ -1650,7 +1670,7 @@ GrahaOdt2HtmlConverter.prototype.span = function(node, element, grahaTextJustify
 };
 GrahaOdt2HtmlConverter.prototype.getWrapperCssRuleValue = function(selectorText, propertyName) {
 	if(this.styleNode && this.styleNode != null) {
-		var selectorPrefix = this.htmlConverterWrapper.getLastFileWrapperFullSelector() + " " + selectorText + " {";
+		var selectorPrefix = this.htmlConverterWrapper.getLastFileWrapperSelector() + " " + selectorText + " {";
 		var propertyPrefix = "\t" + propertyName + ": ";
 		for(var i = 0; i < this.styleNode.childNodes.length; i++) {
 			if(Node.TEXT_NODE == this.styleNode.childNodes[i].nodeType) {
@@ -2071,7 +2091,7 @@ GrahaOdt2HtmlConverter.prototype.getMeta = function() {
 		return this.findByTagName(this.meta, "office:meta");
 };
 GrahaOdt2HtmlConverter.prototype.getNodeValue = function(node) {
-	return GrahaPdfConverterUtility.getNodeValue(node);
+	return GrahaConverterUtility.getNodeValue(node);
 };
 GrahaOdt2HtmlConverter.prototype.getPdfProperties = function() {
 	var node = this.getMeta();
@@ -2120,33 +2140,49 @@ GrahaOdt2HtmlConverter.prototype.getPdfProperties = function() {
 	return null;
 };
 GrahaOdt2HtmlConverter.prototype.html = function() {
-	var htmlElement = this.body();
-	$(htmlElement).find("span.graha_transparent").each(function() {
-		if(
-			$(this).parent().children().length == 1 &&
-			$(this).parent().parent().children().length == 1
-		) {
-			$(this).css("text-decoration", "none");
-			$(this).parent().css("text-decoration", "none");
-			$(this).parent().parent().css("text-decoration", "none");
-		}
-	});
-	var pdfProperties = this.getPdfProperties();
-	if(this.adjustScale) {
-		if(this.pageLayout.pageWidth != null) {
-			var pageWidthPxUnit = this.convertToPx(this.pageLayout.pageWidth);
-			if($(document.body).width() < pageWidthPxUnit) {
-				this.scaleRatio = $(document.body).width()/pageWidthPxUnit;
-				$(htmlElement).css("transform", "scale(" + this.scaleRatio + ")");
-				$(htmlElement).css("transform-origin", "left top");
-			}
-		}
-	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		window.setTimeout(function() {
-			if(this.promises && this.promises != null && Array.isArray(this.promises) && this.promises.length > 0) {
-				Promise.all(this.promises).then(function(values) {
+		_this.body().then(function(htmlElement) {
+			$(htmlElement).find("span.graha_transparent").each(function() {
+				if(
+					$(this).parent().children().length == 1 &&
+					$(this).parent().parent().children().length == 1
+				) {
+					$(this).css("text-decoration", "none");
+					$(this).parent().css("text-decoration", "none");
+					$(this).parent().parent().css("text-decoration", "none");
+				}
+			});
+			var pdfProperties = _this.getPdfProperties();
+			if(_this.adjustScale) {
+				if(_this.pageLayout.pageWidth != null) {
+					var pageWidthPxUnit = _this.convertToPx(_this.pageLayout.pageWidth);
+					var documentBodyWidth = $(document.body).width();
+					_this.scaleRatio = _this.htmlConverterWrapper.calScaleRatio(pageWidthPxUnit, documentBodyWidth);
+				}
+			}
+			window.setTimeout(function() {
+				if(this.promises && this.promises != null && Array.isArray(this.promises) && this.promises.length > 0) {
+					Promise.all(this.promises).then(function(values) {
+						_this.finalizeHtml(htmlElement, pdfProperties).then(function() {
+							resolve({
+								htmlElement: htmlElement,
+								pdfProperties: pdfProperties,
+								htmlConverterWrapper: _this.htmlConverterWrapper,
+								pageLayout: _this.pageLayout,
+								binary: _this.odtBinary,
+								overflow: _this.overflow,
+								scaleRatio: _this.scaleRatio
+							});
+						}).catch(function(error) {
+							console.error(error);
+							reject(error);
+						});
+					}).catch(function(error) {
+						console.error(error);
+						reject(error);
+					});	
+				} else {
 					_this.finalizeHtml(htmlElement, pdfProperties).then(function() {
 						resolve({
 							htmlElement: htmlElement,
@@ -2161,27 +2197,11 @@ GrahaOdt2HtmlConverter.prototype.html = function() {
 						console.error(error);
 						reject(error);
 					});
-				}).catch(function(error) {
-					console.error(error);
-					reject(error);
-				});	
-			} else {
-				_this.finalizeHtml(htmlElement, pdfProperties).then(function() {
-					resolve({
-						htmlElement: htmlElement,
-						pdfProperties: pdfProperties,
-						htmlConverterWrapper: _this.htmlConverterWrapper,
-						pageLayout: _this.pageLayout,
-						binary: _this.odtBinary,
-						overflow: _this.overflow,
-						scaleRatio: _this.scaleRatio
-					});
-				}).catch(function(error) {
-					console.error(error);
-					reject(error);
-				});
-			}
-		}, 10);
+				}
+			}, 10);
+		}).catch(function(error) {
+			reject(error);
+		});
 	});
 };
 GrahaOdt2HtmlConverter.prototype.heightForParent = function(jQueryObject) {
@@ -2456,6 +2476,24 @@ GrahaOdt2HtmlConverter.prototype.finalizeDrawFrames = function() {
 		}, 10);
 	});
 };
+GrahaOdt2HtmlConverter.prototype.split = function() {
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		window.setTimeout(function() {
+			try {
+				var splitter = new GrahaOdtPageSplitter({scaleRatio: _this.scaleRatio, pageLayout: _this.pageLayout}, _this.htmlConverterWrapper);
+				splitter.split();
+				resolve(true);
+			} catch (error) {
+				console.error(error);
+				reject(error);
+			}
+		}, 100);
+	});
+};
+GrahaOdt2HtmlConverter.prototype.applyScale = function() {
+	return this.htmlConverterWrapper.applyScale(this.scaleRatio);
+};
 GrahaOdt2HtmlConverter.prototype.finalizeWrapperHeight = function(htmlElement) {
 	var _this = this;
 	return new Promise(function(resolve, reject) {
@@ -2468,22 +2506,16 @@ GrahaOdt2HtmlConverter.prototype.finalizeWrapperHeight = function(htmlElement) {
 					outerHeight -= _this.offsetTopWithoutMargin($(_this.htmlConverterWrapper.getWrapperSelector()));
 					
 					if(outerHeight > _this.outerHeightWithoutMargin(htmlElement)) {
-						$(htmlElement).outerHeight(outerHeight);
 						_this.overflow = true;
 					} else {
 						_this.overflow = false;
 					}
-					if(_this.scaleRatio < 1) {
-						var scaledOuterWidth = $(htmlElement).outerWidth(true) * _this.scaleRatio;
-						$(_this.scaleWrapperSelector).outerWidth(scaledOuterWidth);
-						
-						var scaledOuterHeight = $(htmlElement).outerHeight(true) * _this.scaleRatio;
-						$(_this.scaleWrapperSelector).outerHeight(scaledOuterHeight);
-						$(_this.scaleWrapperSelector).css("overflow", "hidden");
-					}
+					resolve(true);
+				} else {
+					resolve(true);
 				}
-				resolve(true);
 			} catch (error) {
+				console.error(error);
 				reject(error);
 			}
 		}, 10);
@@ -2514,7 +2546,11 @@ GrahaOdt2HtmlConverter.prototype.finalizeHtml = function(htmlElement, pdfPropert
 				_this.finalizeCollapseTableBorder().then(function() {
 					_this.finalizeDrawFrames().then(function() {
 						_this.finalizeWrapperHeight(htmlElement).then(function() {
-							resolve(true);
+//							_this.split().then(function() {
+								_this.applyScale().then(function() {
+									resolve(true);
+								}).catch(function(error) {reject(error);});
+//							}).catch(function(error) {reject(error);});
 						}).catch(function(error) {reject(error);});
 					}).catch(function(error) {reject(error);});
 				}).catch(function(error) {reject(error);});
@@ -2523,13 +2559,13 @@ GrahaOdt2HtmlConverter.prototype.finalizeHtml = function(htmlElement, pdfPropert
 	});
 };
 GrahaOdt2HtmlConverter.prototype.convertToPx = function(value, defaultValue) {
-	return GrahaPdfConverterUtility.convertToPx(value, defaultValue);
+	return GrahaConverterUtility.convertToPx(value, defaultValue);
 };
 GrahaOdt2HtmlConverter.prototype.getValueStripUnit = function(value, unit) {
-	return GrahaPdfConverterUtility.getValueStripUnit(value, unit);
+	return GrahaConverterUtility.getValueStripUnit(value, unit);
 };
 GrahaOdt2HtmlConverter.prototype.getUnit = function(value) {
-	return GrahaPdfConverterUtility.getUnit(value);
+	return GrahaConverterUtility.getUnit(value);
 };
 GrahaOdt2HtmlConverter.prototype.prepareStyle = function() {
 	var _this = this;
@@ -2550,22 +2586,103 @@ GrahaOdt2HtmlConverter.prototype.prepare = function() {
 	}
 	return this.prepareStyle();
 };
+GrahaOdt2HtmlConverter.prototype.handleOptions = function(options) {
+	if(options && options != null) {
+		if(options.defaultFontFamily && options.defaultFontFamily != null) {
+			this.defaultFontFamily = options.defaultFontFamily;
+		}
+		if(options.fontFamilyConverter && options.fontFamilyConverter != null) {
+			this.fontFamilyConverter = options.fontFamilyConverter;
+		}
+		if(options.adjustScale && options.adjustScale != null) {
+			this.adjustScale = options.adjustScale;
+		}
+	}
+};
+GrahaOdt2HtmlConverter.prototype.convert = function(source, options) {
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(options && options != null) {
+			if(options.sourceType && options.sourceType != null) {
+				if(source && source != null) {
+					if(options.sourceType == "contentsUrl") {
+						if(Array.isArray(source) && source.length == 3) {
+							_this.convertFromContentsUrl(source[0], source[1], source[2], options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+						} else {
+							reject("source must be Array and length is 3");
+						}
+					} else if(options.sourceType == "contents") {
+						if(Array.isArray(source) && source.length == 3) {
+							_this.convertFromContents(source[0], source[1], source[2], options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+						} else {
+							reject("source must be Array and length is 3");
+						}
+					} else if(options.sourceType == "file") {
+						_this.convertFromFile(source, options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+					} else if(options.sourceType == "blob") {
+						_this.convertFromBlob(source, options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+					} else if(options.sourceType == "zip") {
+						if(Array.isArray(source) && source.length == 2) {
+							_this.convertFromZip(source[0], source[1], options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+						} else {
+							reject("source must be Array and length is 2");
+						}
+					} else if(options.sourceType == "url") {
+						_this.convertFromUrl(source, options).then(function(data) {
+							resolve(data);
+						}).catch(function(error) {
+							console.error(error);
+							rejct(error);
+						});
+					} else {
+						reject("options.sourceType must be [contentsUrl, contents, file, blob, zip, url]");
+					}
+				} else {
+					reject("source is empty");
+				}
+			} else {
+				reject("options.sourceType is empty");
+			}
+		} else {
+			reject("options is empty");
+		}
+	});
+};
 GrahaOdt2HtmlConverter.prototype.convertFromContentsUrl = function(metaUrl, headerUrl, contentUrl, options) {
 	return this.convertFromOdtContentsUrl(metaUrl, headerUrl, contentUrl, options);
 };
 GrahaOdt2HtmlConverter.prototype.convertFromOdtContentsUrl = function(metaUrl, headerUrl, contentUrl, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadFromUrl(metaUrl, headerUrl, contentUrl).then(function(data) {
+		_this.loadFromUrl(metaUrl, headerUrl, contentUrl).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {
@@ -2582,14 +2699,8 @@ GrahaOdt2HtmlConverter.prototype.convertFromContents = function(meta, header, co
 	return this.convertFromOdtContents(meta, header, content, options);
 };
 GrahaOdt2HtmlConverter.prototype.convertFromOdtContents = function(meta, header, content, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	this.load(meta, header, content);
 	return this.prepare();
@@ -2599,18 +2710,12 @@ GrahaOdt2HtmlConverter.prototype.convertFromFile = function(file, options) {
 	return this.convertFromOdtFile(file, options);
 };
 GrahaOdt2HtmlConverter.prototype.convertFromOdtFile = function(file, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadOdtFromFile(file).then(function(data) {
+		_this.loadOdtFromFile(file).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {
@@ -2627,18 +2732,35 @@ GrahaOdt2HtmlConverter.prototype.convertFromBlob = function(blob, options) {
 	return this.convertFromOdtBlob(blob, options);
 };
 GrahaOdt2HtmlConverter.prototype.convertFromOdtBlob = function(blob, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadOdtFromBlob(blob).then(function(data) {
+		_this.loadOdtFromBlob(blob).then(function(values) {
+			_this.prepare().then(function(data) {
+				resolve(data);
+			}).catch(function(error) {
+				console.error(error);
+				reject(error);
+			});
+		}).catch(function(error) {
+			console.error(error);
+			reject(error);
+		});
+	});
+};
+GrahaOdt2HtmlConverter.prototype.convertFromZip = function(zip, blob, options) {
+	return this.convertFromOdtZip(zip, blob, options);
+};
+GrahaOdt2HtmlConverter.prototype.convertFromOdtZip = function(zip, blob, options) {
+	if(options && options != null) {
+		this.handleOptions(options);
+	}
+	this.odtBinary = blob;
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		_this.loadOdtFromZip(zip).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {
@@ -2655,18 +2777,12 @@ GrahaOdt2HtmlConverter.prototype.convertFromUrl = function(url, options) {
 	return this.convertFromOdtUrl(url, options);
 };
 GrahaOdt2HtmlConverter.prototype.convertFromOdtUrl = function(url, options) {
-	if(options && options != null && options.defaultFontFamily && options.defaultFontFamily != null) {
-		this.defaultFontFamily = options.defaultFontFamily;
-	}
-	if(options && options != null && options.fontFamilyConverter && options.fontFamilyConverter != null) {
-		this.fontFamilyConverter = options.fontFamilyConverter;
-	}
-	if(options && options != null && options.adjustScale && options.adjustScale != null) {
-		this.adjustScale = options.adjustScale;
+	if(options && options != null) {
+		this.handleOptions(options);
 	}
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		_this.loadOdtFromUrl(url).then(function(data) {
+		_this.loadOdtFromUrl(url).then(function(values) {
 			_this.prepare().then(function(data) {
 				resolve(data);
 			}).catch(function(error) {

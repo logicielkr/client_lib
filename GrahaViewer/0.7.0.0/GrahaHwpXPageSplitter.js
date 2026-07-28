@@ -41,28 +41,28 @@ function GrahaHwpXPageSplitter(options) {
 	this.availableHeight = 0;
 }
 GrahaHwpXPageSplitter.prototype.parseInt = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseInt(str, defaultValue);
+	return GrahaConverterUtility.parseInt(str, defaultValue);
 };
 GrahaHwpXPageSplitter.prototype.parseFloat = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseFloat(str, defaultValue);
+	return GrahaConverterUtility.parseFloat(str, defaultValue);
 };
 GrahaHwpXPageSplitter.prototype.offsetTopWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetTopWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetTopWithMargin(node, this.scaleRatio);
 };
 GrahaHwpXPageSplitter.prototype.offsetTopWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetTopWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetTopWithoutMargin(node, this.scaleRatio);
 };
 GrahaHwpXPageSplitter.prototype.offsetBottomWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetBottomWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetBottomWithMargin(node, this.scaleRatio);
 };
 GrahaHwpXPageSplitter.prototype.offsetBottomWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetBottomWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetBottomWithoutMargin(node, this.scaleRatio);
 };
 GrahaHwpXPageSplitter.prototype.outerHeightWithMargin = function(node) {
-	return GrahaPdfConverterUtility.outerHeightWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.outerHeightWithMargin(node, this.scaleRatio);
 };
 GrahaHwpXPageSplitter.prototype.height = function(node) {
-	return GrahaPdfConverterUtility.height(node, this.scaleRatio);
+	return GrahaConverterUtility.height(node, this.scaleRatio);
 };
 GrahaHwpXPageSplitter.prototype.copy = function(node) {
 	return GrahaOdtPageSplitterUtility.copy(node);
@@ -261,7 +261,7 @@ GrahaHwpXPageSplitter.prototype.overflow = function(node, lastPage, footNote) {
 		} else {
 			last = lastChild;
 		}
-		this.availableHeight = lastPageInnerSectionOffsetBottom - this.offsetTopWithoutMargin(last);
+		this.setAvailableHeight(lastPageInnerSectionOffsetBottom - this.offsetTopWithoutMargin(last));
 		if(arguments.length > 2 && footNote && footNote != null) {
 		} else if(node instanceof GrahaDummyElement) {
 		} else {

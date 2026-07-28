@@ -46,50 +46,50 @@ function GrahaOdtPageSplitter(options, htmlConverterWrapper) {
 	this.htmlConverterWrapper = htmlConverterWrapper;
 }
 GrahaOdtPageSplitter.prototype.parseInt = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseInt(str, defaultValue);
+	return GrahaConverterUtility.parseInt(str, defaultValue);
 };
 GrahaOdtPageSplitter.prototype.parseFloat = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseFloat(str, defaultValue);
+	return GrahaConverterUtility.parseFloat(str, defaultValue);
 };
 GrahaOdtPageSplitter.prototype.offsetBottomWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetBottomWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetBottomWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdtPageSplitter.prototype.width = function(node) {
-	return GrahaPdfConverterUtility.width(node, this.scaleRatio);
+	return GrahaConverterUtility.width(node, this.scaleRatio);
 };
 /*
 GrahaOdtPageSplitter.prototype.widthWithoutPadding = function(node) {
-	return GrahaPdfConverterUtility.widthWithoutPadding(node, this.scaleRatio);
+	return GrahaConverterUtility.widthWithoutPadding(node, this.scaleRatio);
 };
 */
 GrahaOdtPageSplitter.prototype.offsetTopWithoutMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetTopWithoutMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetTopWithoutMargin(node, this.scaleRatio);
 };
 GrahaOdtPageSplitter.prototype.paddingTop = function(node) {
-	return GrahaPdfConverterUtility.paddingTop(node, this.scaleRatio);
+	return GrahaConverterUtility.paddingTop(node, this.scaleRatio);
 };
 GrahaOdtPageSplitter.prototype.paddingBottom = function(node) {
-	return GrahaPdfConverterUtility.paddingBottom(node, this.scaleRatio);
+	return GrahaConverterUtility.paddingBottom(node, this.scaleRatio);
 };
 GrahaOdtPageSplitter.prototype.offsetBottomWithMarginWithoutPaddingTop = function(node) {
-	return GrahaPdfConverterUtility.offsetBottomWithMargin(node, this.scaleRatio) - this.paddingTop(this.entirePageNode);
+	return GrahaConverterUtility.offsetBottomWithMargin(node, this.scaleRatio) - this.paddingTop(this.entirePageNode);
 };
 GrahaOdtPageSplitter.prototype.positionBottomWithMarginWithoutPaddingTop = function(node) {
-	return GrahaPdfConverterUtility.positionBottomWithMargin(node, this.scaleRatio) - this.paddingTop(this.entirePageNode);
+	return GrahaConverterUtility.positionBottomWithMargin(node, this.scaleRatio) - this.paddingTop(this.entirePageNode);
 };
 GrahaOdtPageSplitter.prototype.height = function(node) {
-	return GrahaPdfConverterUtility.height(node, this.scaleRatio);
+	return GrahaConverterUtility.height(node, this.scaleRatio);
 };
 /*
 GrahaOdtPageSplitter.prototype.heightWithoutPadding = function(node) {
-	return GrahaPdfConverterUtility.heightWithoutPadding(node, this.scaleRatio);
+	return GrahaConverterUtility.heightWithoutPadding(node, this.scaleRatio);
 };
 */
 GrahaOdtPageSplitter.prototype.offsetTopWithMargin = function(node) {
-	return GrahaPdfConverterUtility.offsetTopWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.offsetTopWithMargin(node, this.scaleRatio);
 };
 GrahaOdtPageSplitter.prototype.outerHeightWithMargin = function(node) {
-	return GrahaPdfConverterUtility.outerHeightWithMargin(node, this.scaleRatio);
+	return GrahaConverterUtility.outerHeightWithMargin(node, this.scaleRatio);
 };
 GrahaOdtPageSplitter.prototype.clear = function(node) {
 	GrahaOdtPageSplitterUtility.clear(node);
@@ -839,7 +839,7 @@ GrahaOdtPageSplitter.prototype.moveToCurrentPage = function(node) {
 		nodeOffsetBottom = this.offsetBottomWithMarginWithoutPaddingTop(node);
 	}
 	if(this.headerHeight() > 0) {
-		var header = this.htmlConverterWrapper.getLastHeader().clone();
+		var header = $(this.htmlConverterWrapper.getLastHeader()).clone();
 		var _this = this;
 		header.find("span.graha-page-number").each(function() {
 			$(this).text(_this.currentPage.getAttribute("data-graha-page-number"));
@@ -889,7 +889,7 @@ GrahaOdtPageSplitter.prototype.moveToCurrentPage = function(node) {
 		}
 	}
 	if(this.footerHeight() > 0) {
-		var footer = this.htmlConverterWrapper.getFirstFooter().clone();
+		var footer = $(this.htmlConverterWrapper.getFirstFooter()).clone();
 		var _this = this;
 		footer.find("span.graha-page-number").each(function() {
 			$(this).text(_this.currentPage.getAttribute("data-graha-page-number"));
@@ -917,18 +917,6 @@ GrahaOdtPageSplitter.prototype.clear = function() {
 			$(this).remove();
 		}
 	});
-	if($(this.htmlConverterWrapper.getLastFileWrapperFullSelector()).children().length > 1) {
-		var outerHeight = this.offsetBottomWithoutMargin($(this.htmlConverterWrapper.getLastFileWrapperFullSelector()).children().last());
-		outerHeight -= this.offsetTopWithoutMargin($(this.htmlConverterWrapper.getLastFileWrapperFullSelector()));
-		if(outerHeight > $(this.htmlConverterWrapper.getLastFileWrapperFullSelector()).outerHeight(true)) {
-			$(this.htmlConverterWrapper.getLastFileWrapperFullSelector()).outerHeight(Math.floor(outerHeight));
-		}
-		if(this.scaleRatio < 1) {
-			var scaledOuterHeight = $(this.htmlConverterWrapper.getLastFileWrapperFullSelector()).outerHeight(true) * this.scaleRatio;
-			$(this.htmlConverterWrapper.getScaleWrapperSelector()).outerHeight(scaledOuterHeight);
-			$(this.htmlConverterWrapper.getScaleWrapperSelector()).css("overflow", "hidden");
-		}
-	}
 };
 GrahaOdtPageSplitter.prototype.split = function() {
 	var _this = this;

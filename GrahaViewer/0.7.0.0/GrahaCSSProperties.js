@@ -39,7 +39,7 @@ GrahaCSSProperties.prototype.clone = function() {
 	return properties;
 };
 GrahaCSSProperties.prototype.parseFloat = function(str, defaultValue) {
-	return GrahaPdfConverterUtility.parseFloat(str, defaultValue);
+	return GrahaConverterUtility.parseFloat(str, defaultValue);
 };
 GrahaCSSProperties.prototype.push = function(name, value, unit) {
 	if(arguments.length == 2) {
