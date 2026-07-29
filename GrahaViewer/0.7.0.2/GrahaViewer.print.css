@@ -1,0 +1,28 @@
+body, html {
+	margin: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding: 0px;
+	height: 0px;
+}
+
+body > :not(div#GrahaHtmlConverterScaleWrapper) {
+	display: none !important;
+}
+div#GrahaHtmlConverterWrapper,
+div#GrahaHtmlConverterScaleWrapper,
+div.GrahaHtmlConverterFileWrapper
+{
+	position: absolute;
+	top: 0px;
+	margin: 0px;
+	padding: 0px;
+	height:unset;
+	margin-top:0px;
+}
+div.GrahaHtmlConverterFileWrapper p.graha_page,
+div.GrahaHtmlConverterFileWrapper p.graha_entire_page {
+	overflow: hidden;
+	border-bottom: 0;
+	margin-bottom: 0px;
+}
