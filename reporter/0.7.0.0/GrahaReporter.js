@@ -36,10 +36,10 @@
  * xslt-polyfill 는 2026년에 Firefox 와 Chrome 에서 기능이 삭제 될 예정인 XSLTProcessor 를 위한 것이다.
  
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.6.0.0
+ * @version 0.7.0.0
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/reporter/0.6.0.0
+ * https://github.com/logicielkr/client_lib/tree/master/reporter/0.7.0.0
  */
 
 function GrahaReporter() {
