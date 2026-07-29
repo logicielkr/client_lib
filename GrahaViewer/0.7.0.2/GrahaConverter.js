@@ -23,12 +23,14 @@
  * odt 혹은 hwpx 로부터 만들어진 HTML 을 PDF 로 변경한다.
 
  * GrahaConverter 전체적인 사용법은 README.md 를 참조한다.
+ 
+ * 0.7.0.0 에서 GrahaPdfConverter 에서 GrahaConverter 로 변경되었다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.6.0.1
+ * @version 0.7.0.2
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.0.1
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.2
  */
 
 function GrahaConverter(options) {

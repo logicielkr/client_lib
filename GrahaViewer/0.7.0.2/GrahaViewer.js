@@ -23,10 +23,10 @@
  * odt 혹은 hwpx 을 HTML 로 변환한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.6.5.0
- * @since 0.6.5.0
+ * @version 0.7.0.2
+ * @since 0.7
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.5.0
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.2
  */
 
 function GrahaViewer() {
@@ -153,6 +153,7 @@ GrahaViewer.fileName = function(source) {
 	return GrahaConverter.fileName(source);
 };
 GrahaViewer.close = function() {
+	GrahaViewer.removeGrahaViewerPrintCSS();
 	return new Promise(function(resolve, reject) {
 		try {
 			$(window).off("keydown");
@@ -205,6 +206,46 @@ GrahaViewer.download = function() {
 		console.error("GrahaViewer.converter is null");
 	}
 };
+GrahaViewer.removeGrahaViewerPrintCSS = function() {
+	var printCSS = null;
+	var links = document.getElementsByTagName('link');
+	for(let i = (links.length - 1); i >= 0 ; i--) {
+		var href = links.item(i).href;
+		if(
+			href.lastIndexOf("/GrahaViewer.css") >= 0 &&
+			(href.length - "/GrahaViewer.css".length) == href.lastIndexOf("/GrahaViewer.css")
+		) {
+			printCSS = href.substring(0, href.lastIndexOf("/GrahaViewer.css") + 1) + "GrahaViewer.print.css"
+		} else if(
+			href.lastIndexOf("/GrahaViewer.print.css") >= 0 &&
+			(href.length - "/GrahaViewer.print.css".length) == href.lastIndexOf("/GrahaViewer.print.css")
+		) {
+			$(links.item(i)).remove();
+		}
+	}
+	return printCSS;
+};
+GrahaViewer.insertGrahaViewerPrintCSS = function() {
+	return new Promise(function(resolve, reject) {
+		var printCSS = GrahaViewer.removeGrahaViewerPrintCSS();
+		if(printCSS == null) {
+			reject("css for print is not find");
+		} else {
+			var link = document.createElement('link');
+			link.setAttribute("rel", "stylesheet");
+			link.href = printCSS;
+			link.media = "print";
+			 
+			link.onload = function() {
+				resolve(link);
+			}
+			link.onerror = function() {
+				reject("css for print is not loaded");
+			}
+			document.getElementsByTagName('HEAD').item(0).appendChild(link);
+		}
+	});	
+};
 GrahaViewer.displayMenu = function(modifyDocumentTitle) {
 	window.setTimeout(function() {
 		if(GrahaViewer.converter != null) {
@@ -219,7 +260,11 @@ GrahaViewer.displayMenu = function(modifyDocumentTitle) {
 			} else {
 				if(GrahaViewer.menus && GrahaViewer.menus != null) {
 					GrahaViewer.menus.show("pdf");
-					GrahaViewer.menus.show("print");
+					GrahaViewer.insertGrahaViewerPrintCSS().then(function(link) {
+						GrahaViewer.menus.show("print");
+					}).catch(function(error) {
+						console.error(error);
+					});
 				}
 			}
 			if(GrahaViewer.converter.downloadable()) {

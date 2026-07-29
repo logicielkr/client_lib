@@ -87,3 +87,7 @@
 ### 3.2. 0.7.0.1
 
 - GrahaConverter.convert 함수가 zip 을 파라미터로 받았으나, blob 이 null 인 경우(GrahaReporter.js 에서 생성한 zip 을 파라미터로 받은 경우) zip 을 blob 으로 변경해서 다운로드 할 수 있도록 처리
+
+### 3.3. 0.7.0.2
+
+- GrahaViewer.print.css 는 GrahaViewer 가 웹페이지에 올라가 있는 경우에만 적용되도록 수정

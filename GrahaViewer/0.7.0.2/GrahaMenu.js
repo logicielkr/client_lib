@@ -23,10 +23,10 @@
  * Menu 및 MenuItem 을 관리한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.6.5.0
- * @since 0.6.5.0
+ * @version 0.7.0.2
+ * @since 0.7
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.6.5.0
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.2
  */
 
 function GrahaMenu(properties) {
