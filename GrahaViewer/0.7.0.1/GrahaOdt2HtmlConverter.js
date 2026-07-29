@@ -40,6 +40,7 @@ GrahaOdt2HtmlConverter.prototype.init = function() {
 	
 	this.overflow = false;
 	this.odtBinary = null;
+	this.zip = null;
 
 	this.htmlConverterWrapper = null;
 };
@@ -2171,6 +2172,7 @@ GrahaOdt2HtmlConverter.prototype.html = function() {
 								htmlConverterWrapper: _this.htmlConverterWrapper,
 								pageLayout: _this.pageLayout,
 								binary: _this.odtBinary,
+								zip: _this.zip,
 								overflow: _this.overflow,
 								scaleRatio: _this.scaleRatio
 							});
@@ -2190,6 +2192,7 @@ GrahaOdt2HtmlConverter.prototype.html = function() {
 							htmlConverterWrapper: _this.htmlConverterWrapper,
 							pageLayout: _this.pageLayout,
 							binary: _this.odtBinary,
+							zip: _this.zip,
 							overflow: _this.overflow,
 							scaleRatio: _this.scaleRatio
 						});

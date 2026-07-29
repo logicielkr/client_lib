@@ -337,6 +337,9 @@ GrahaConverter.prototype.finilize = function(doc, options, sourceElement, margin
 		});
 	});
 };
+GrahaConverter.prototype.setMimeType = function(mimeType) {
+	this.mimeType = mimeType;
+};
 GrahaConverter.prototype.setOutputFileName = function(fileName) {
 	this.outputFileName = fileName;
 };
@@ -350,6 +353,12 @@ GrahaConverter.prototype.getDownloadFileName = function() {
 	return this.downloadFileName;
 };
 GrahaConverter.prototype.getDownloadMimeType = function() {
+	if(this.mimeType && this.mimeType != null) {
+		return this.mimeType;
+	}
+	
+	console.error("this.mimeType is null");
+	
 	if(this.fileFormat == "hwpx") {
 		return "application/hwp+zip";
 	} else {
@@ -368,7 +377,7 @@ GrahaConverter.prototype.split = function() {
 						_this.currentFormat = "splitted";
 						resolve(true);
 					}).catch(function(error) {
-						console.log(error);
+						console.error(error);
 						reject(error);
 					});
 				}
@@ -420,6 +429,15 @@ GrahaConverter.prototype.prepareConvert = function(options) {
 		if(this.fileFormat && this.fileFormat != null) {
 		} else {
 			this.fileFormat = "odt";
+		}
+	}
+	if(options && options != null && options.mimeType && options.mimeType != null) {
+		this.setMimeType(options.mimeType);
+	} else {
+		if(this.fileFormat == "odt") {
+			this.setMimeType("application/vnd.oasis.opendocument.text");
+		} else if(this.fileFormat == "hwpx") {
+			this.setMimeType("application/hwp+zip");
 		}
 	}
 	if(options && options != null && options.outputFileName && options.outputFileName != null) {
@@ -607,6 +625,7 @@ GrahaConverter.prototype.convert = function(source, options) {
 			_this.htmlConverterWrapper = data.htmlConverterWrapper;
 			_this.pageLayout = data.pageLayout;
 			_this.binary = data.binary;
+			_this.zip = data.zip;
 			_this.overflow = data.overflow;
 			_this.scaleRatio = data.scaleRatio;
 			if(_this.format == "splitted" || _this.format == "pdf") {
@@ -715,53 +734,117 @@ GrahaConverter.prototype.defaultFonts = function() {
 	});
 	return fonts;
 };
-GrahaConverter.prototype.getBinary = function() {
-	if(this.binary && this.binary != null) {
-		if(this.binary instanceof Blob) {
-			return this.binary;
-		} else if(this.binary instanceof ArrayBuffer) {
-			return new Blob([this.binary]);
-		} else {
-			throw new Error("this.binary is not Blob and ArrayBuffer");
+GrahaConverter.prototype.binaryFromZip = function(zip) {
+	JSZip.support.nodebuffer = false;
+	var legacy = false;
+	if(typeof(iconv) != "undefined" && typeof(encode) == "function") {
+		var userAgent = navigator.userAgent;
+		if(userAgent.indexOf("Windows") > 0) {
+			if(userAgent.indexOf("Windows NT") > 0) {
+				var text = userAgent.substring(0, userAgent.indexOf(";"));
+				if(parseFloat(text.substring(text.lastIndexOf(" ") + 1)) >= 10) {
+				} else {
+					var legacy = true;
+				}
+			} else {
+				var legacy = true;
+			}
 		}
 	}
-	return null;
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(legacy) {
+			zip.generateAsync({
+				type : "blob",
+				encodeFileName: function(str) {
+					return iconv.encode(str, "EUC-KR");
+				},
+				mimeType: _this.mimeType
+			}).then(function (blob) {
+				resolve(blob);
+			}).catch(function(error) {
+				reject(error);
+			});
+		} else {
+			zip.generateAsync({
+				type : "blob",
+				mimeType: _this.mimeType
+			}).then(function (blob) {
+				resolve(blob);
+			}).catch(function(error) {
+				reject(error);
+			});
+		}
+	});	
+};
+GrahaConverter.prototype.getBinary = function() {
+	var _this = this;
+	return new Promise(function(resolve, reject) {
+		if(_this.binary && _this.binary != null) {
+			if(_this.binary instanceof Blob) {
+				resolve(_this.binary);
+			} else if(_this.binary instanceof ArrayBuffer) {
+				resolve(new Blob([_this.binary]));
+			} else {
+				reject("_this.binary is not Blob and ArrayBuffer");
+			}
+		} if(_this.zip && _this.zip != null) {
+			_this.binaryFromZip(_this.zip).then(function(blob) {
+				_this.binary = blob;
+				resolve(blob);
+			}).catch(function(error) {
+				reject(error);
+			});
+		} else {
+			reject("_this.binary or this.zip is null");
+		}
+	});
 };
 GrahaConverter.prototype.downloadable = function() {
-	var binary = this.getBinary();
-	if(binary != null) {
+	if(this.zip && this.zip != null) {
 		return true;
+	}
+	if(this.binary && this.binary != null) {
+		if(this.binary instanceof Blob) {
+			return true;
+		} else if(this.binary instanceof ArrayBuffer) {
+			return true;
+		}
 	}
 	return false;
 };
 GrahaConverter.prototype.download = function() {
 	var _this = this;
 	return new Promise(function(resolve, reject) {
-		if(window.navigator && window.navigator.msSaveOrOpenBlob) {
-			window.navigator.msSaveOrOpenBlob(_this.getBinary(), _this.getDownloadFileName());
-			resolve(true);
-		}
-		var URL = null;
-		if(window.URL) {
-			URL = window.URL;
-		} else if(window.webkitURL) {
-			URL = window.webkitURL;
-		} else {
-			reject("Web browser is not support window.URL and window.webkitURL");
-		}
-		var blobUrl = URL.createObjectURL(_this.getBinary(), {type: _this.getDownloadMimeType()});
-		var a = document.createElement("a");
-		if(_this.getDownloadFileName() && typeof(a.download) != "undefined") {
-			a.href = blobUrl;
-			a.download = _this.getDownloadFileName();
-			document.body.appendChild(a);
-			a.click();
-			URL.revokeObjectURL(blobUrl);
-			resolve(true);
-		} else {
-			URL.revokeObjectURL(blobUrl);
-			reject("Web browser is not support document.createElement(\"a\").download");
-		}
+		_this.getBinary().then(function(blobBinary) {
+			if(window.navigator && window.navigator.msSaveOrOpenBlob) {
+				window.navigator.msSaveOrOpenBlob(blobBinary, _this.getDownloadFileName());
+				resolve(true);
+			}
+			var URL = null;
+			if(window.URL) {
+				URL = window.URL;
+			} else if(window.webkitURL) {
+				URL = window.webkitURL;
+			} else {
+				reject("Web browser is not support window.URL and window.webkitURL");
+			}
+			var blobUrl = URL.createObjectURL(blobBinary, {type: _this.getDownloadMimeType()});
+			var a = document.createElement("a");
+			if(_this.getDownloadFileName() && typeof(a.download) != "undefined") {
+				a.href = blobUrl;
+				a.download = _this.getDownloadFileName();
+				document.body.appendChild(a);
+				a.click();
+				URL.revokeObjectURL(blobUrl);
+				resolve(true);
+			} else {
+				URL.revokeObjectURL(blobUrl);
+				reject("Web browser is not support document.createElement(\"a\").download");
+			}
+		}).catch(function (error) {
+			reject(error);
+		});
 	});
 };
 GrahaConverter.prototype.getWrapperSelector = function() {

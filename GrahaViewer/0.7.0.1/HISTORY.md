@@ -83,3 +83,7 @@
 - [GrahaViewer 의 GrahaHwpX2HtmlConverter 에서 줄간격(line-height) 적용 방법 변경 #14](https://github.com/logicielkr/client_lib/issues/14)
 - [GrahaViewer 의 GrahaOdt2HtmlConverter 와 GrahaHwpX2HtmlConverter 에서 중복되는 코드가 발견됨 #15](https://github.com/logicielkr/client_lib/issues/15)
 - [GrahaViewer 의 GrahaPdfConverter 에서 중복되는 코드 발견 #16](https://github.com/logicielkr/client_lib/issues/16)
+
+### 3.2. 0.7.0.1
+
+- GrahaConverter.convert 함수가 zip 을 파라미터로 받았으나, blob 이 null 인 경우(GrahaReporter.js 에서 생성한 zip 을 파라미터로 받은 경우) zip 을 blob 으로 변경해서 다운로드 할 수 있도록 처리

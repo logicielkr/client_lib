@@ -18,7 +18,7 @@ zip 으로 압축되어 있고,
 
 ###		1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/reporter/0.6.0.0
+https://github.com/logicielkr/client_lib/tree/master/reporter/0.7.0.0
 
 ###		1.3. 호환성
 
@@ -37,12 +37,16 @@ jquery, jszip, iconv-lite 에 의존하며, cdn 은 다음과 같다.
 - https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js
 - https://cdn.jsdelivr.net/npm/jszip-utils@0.1.0/dist/jszip-utils.min.js
 - http://cdn.jsdelivr.net/npm/bluebird@3.3.4/js/browser/bluebird.min.js
+- https://cdn.jsdelivr.net/npm/xslt-polyfill@1.0.23/xslt-polyfill.min.js
 
 > iconv-lite 는
 > 파일이름을 EUC-KR (MS949) 로 하기 위한 것으로
 > 오래된 Windows O/S (7 이하) 에서만 필요하다.
 
-> bluebird 는 IE 11 를 위한 것이고, 현대적인 웹브라우저에서는 필요없는 것들이다. 
+> bluebird 는 IE 11 를 위한 것이고, 현대적인 웹브라우저에서는 필요없는 것들이다.
+
+> GrahaReporter.js 에서 사용중인 XSLTProcessor 는 Firefox, Chrome 에서 삭제될 예정이며,
+> xslt-polyfill 을 추가해서 사용 한다.
 
 ##	2. GrahaReporter.js 사용방법
 
@@ -98,29 +102,62 @@ GrahaReporter.archive(obj).then(function(blob) {
 
 ####			2.1.3. GrahaReporter.blob 함수
 
-Promise (blob) 를 반환한다.
+Promise (blob 의 배열) 를 반환한다.
 
-파일이 여러 개인 경우, blob 의 배열로 반환한다.
+파일이 1개인 경우에도, blob 의 배열로 반환한다.
 
 ```javascript
 var dataUrl = "report.xml";
 var entries = [
-		{
-			templateUrl: "template.odft",
-			fileName:"result.odt",
-			mimeType:"application/vnd.oasis.opendocument.text"
-		}
-	];
+	{
+		templateUrl: "template.odft",
+		fileName:"result.odt",
+		mimeType:"application/vnd.oasis.opendocument.text"
+	}
+];
 var obj = {
-		dataUrl: dataUrl,
-		entries: entries
-	};
+	dataUrl: dataUrl,
+	entries: entries
+};
 GrahaReporter.blob(obj).then(function(blobs) {
-	}).catch(function(error) {
-	});
+}).catch(function(error) {
+});
 ```
 
-####			2.1.4. GrahaReporter.report 함수
+####			2.1.4. GrahaReporter.zip 함수
+
+Promise (zip 의 배열) 를 반환한다.
+
+파일이 1개인 경우에도, zip 의 배열로 반환한다.
+
+```javascript
+var dataUrl = "report.xml";
+var entries = [
+	{
+		templateUrl: "template.odft",
+		fileName:"result.odt",
+		mimeType:"application/vnd.oasis.opendocument.text"
+	}
+];
+var obj = {
+	dataUrl: dataUrl,
+	entries: entries
+};
+GrahaReporter.zip(obj).then(function(zips) {
+	if(zips && zips != null && Array.isArray(zips) && zips.length > 0) {
+		if(zips[0].zip && zips[0].zip != null) {
+			var opts = {};
+			if(zips[0].fileName && zips[0].fileName != null) {
+				opts.fileName = zips[0].fileName;
+			}
+			GrahaViewer.convert(zips[0].zip, opts);
+		}
+	}
+}).catch(function(error) {
+});
+```
+
+####			2.1.5. GrahaReporter.report 함수
 
 GrahaReporter.download 함수와 동일하지만,
 GrahaReporter.download 함수가 Promise 객체를 반환하는데 반해,
@@ -144,7 +181,7 @@ var obj = {
 GrahaReporter.report(obj);
 ```
 
-####			2.1.5. GrahaReporter.create 함수
+####			2.1.6. GrahaReporter.create 함수
 
 GrahaReporter.download 함수와 동일하지만,
 GrahaReporter.download 함수가 Promise 객체를 반환하는데 반해,

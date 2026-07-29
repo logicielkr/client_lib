@@ -29,4 +29,11 @@
 ### 2.1. 0.6.0.0
 
 - Promise 를 리턴하는 GrahaReporter.download, GrahaReporter.archive, GrahaReporter.blob 함수 추가
-- 종전의 GrahaReporter.report 함수는 내부적으로 GrahaReporter.download 를 호출해서, 에러메시지를 alert 창으로 띄우는 것으로 변경
+- 종전의 GrahaReporter.report 함수는 내부적으로 GrahaReporter.download 를 호출해서, 에러 메시지를 alert 창으로 띄우는 것으로 변경
+
+## 3. 0.7
+
+### 3.1. 0.7.0.0
+
+- Promise 를 리턴하는 GrahaReporter.zip 함수 추가.  성공하면 zip 을 반환
+- 주석 추가

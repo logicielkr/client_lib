@@ -11,7 +11,7 @@ GrahaViewer 는 웹브라우저에서 동작하는 다음 2가지 형식의 HTML
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.0
+https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.1
 
 ### 1.3. 호환성
 
@@ -52,6 +52,10 @@ CDN 에서 다음과 같은 css 와 Javascript 라이브러리를 불러와서 �
 - [bluebird.min.js](//cdn.jsdelivr.net/npm/bluebird@3.3.4/js/browser/bluebird.min.js)
 - [hasfont.min.js](//cdn.jsdelivr.net/npm/has-font@1.0.2/hasfont.min.js)
 - [polyfills.umd.js](//cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/polyfills.umd.js)
+
+#### 1.4.4. GrahaReporter.js 와 함께 사용하는 경우
+
+* [iconv.js](https://cdn.jsdelivr.net/gh/jcubic/static@master/js/iconv.js)
 
 ## 2. 사용법
 

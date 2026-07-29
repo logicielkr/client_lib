@@ -80,14 +80,14 @@ GrahaViewer.convert = function(source, opts, menus) {
 };
 GrahaViewer.detectFileFormatFromZip = function(zip, blob) {
 	return new Promise(function(resolve, reject) {
-		zip.file("mimetype").async("string").then(function(mimetype) {
+		zip.file("mimetype").async("string").then(function(mimeType) {
 			var fileFormat = null;
-			if(mimetype == "application/hwp+zip") {
+			if(mimeType == "application/hwp+zip") {
 				fileFormat = "hwpx";
-			} else if(mimetype == "application/vnd.oasis.opendocument.text") {
+			} else if(mimeType == "application/vnd.oasis.opendocument.text") {
 				fileFormat = "odt";
 			}
-			resolve({mimetype: mimetype, fileFormat: fileFormat, zip: zip, blob: blob});
+			resolve({mimeType: mimeType, fileFormat: fileFormat, zip: zip, blob: blob});
 		}).catch(function(error) {
 			console.error(error);
 			reject(error);

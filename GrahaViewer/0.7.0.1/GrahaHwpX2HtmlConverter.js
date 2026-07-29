@@ -40,6 +40,7 @@ GrahaHwpX2HtmlConverter.prototype.init = function() {
 	this.scaleRatio = 1;
 	
 	this.hwpXBinary = null;
+	this.zip = null;
 
 	this.boderCollapser = new GrahaOdtTableBorderCollapser(
 		{ignoreDotted: false}
@@ -231,7 +232,7 @@ GrahaHwpX2HtmlConverter.prototype.loadHwpXFromFile = function(file) {
 };
 GrahaHwpX2HtmlConverter.prototype.loadHwpXFromZip = function(zip) {
 	var _this = this;
-	_this.zip = zip;
+	this.zip = zip;
 	return new Promise(function(resolve, reject) {
 		var tasks = new Array();
 		tasks.push(zip.file("Contents/content.hpf").async("string"));
@@ -4360,6 +4361,7 @@ GrahaHwpX2HtmlConverter.prototype.prepare = function() {
 					htmlConverterWrapper: _this.htmlConverterWrapper,
 					pageLayout: pageLayout,
 					binary: _this.hwpXBinary,
+					zip: _this.zip,
 					overflow: _this.overflow,
 					scaleRatio: _this.scaleRatio
 				});
