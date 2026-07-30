@@ -1,0 +1,43 @@
+body {
+	margin:10px;
+}
+input, textarea, select, td, th {
+	font-size:18px;
+}
+table.graha {
+	border-collapse:collapse;
+	border-top:#0f4c81 2px solid;
+	border-bottom:#0f4c81 1px solid;
+	width:100%;
+	margin-top:0px;
+	font-size:18px;
+}
+table.graha th.graha {
+	font-weight:400;
+	background-color:#0f4c81;
+	text-align:center;
+	color:#FFFFFF;
+	padding-top:7px;
+	padding-bottom:7px;
+	font-size:18px;
+}
+table.graha td.graha {
+	border-bottom:#C3C3C3 inset 1px;
+	color:#333;
+	padding-top:7px;
+	padding-bottom:7px;
+	font-size:18px;
+}
+table.graha tbody.graha td.graha a {
+	text-decoration:none;
+	font-size:18px;
+}
+h2.title {
+	margin:0;
+	margin-bottom:10px;
+	width:100%;
+	padding:0;
+	background-color:#f3F3F3;
+	text-align:center;
+	clear:both;
+}
