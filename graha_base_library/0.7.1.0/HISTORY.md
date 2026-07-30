@@ -38,3 +38,10 @@
 - 원하는 것 : input 이 td 에 여백없이 가득 차는 차는 것.
 - box-sizing: border-box; 으로 처리
 - IE11, 최신버전의 Firefox, Google Chrome,  Chromium 기반의 Microsoft Edge 에서 테스트 함.
+
+## 2. 0.7
+
+### 2.1.	0.7.1.0
+
+- [graha_base_library 에서 html tag 에 걸려있는 css 는 제거해야 한다. #20](https://github.com/logicielkr/client_lib/issues/20)
+- graha 버전도 0.7.1.0 이상이어야 하며, 그 이하인 경우 페이지 layout 이 깨질 수 있음.

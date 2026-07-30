@@ -22,7 +22,7 @@
 ## 3. Graha Base Libray
 
 - Graha 응응프로그램에서 공통적으로 사용되는 Javascript 혹은 css 조각들이다.
-- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/graha_base_library/0.5.0.4
+- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/graha_base_library/0.7.1.0
 
 ## 4. Lang.js
 
@@ -38,4 +38,4 @@
 
 - [한/글] 로 작성한 .hwpx 문서와 [Apache OpenOffice](https://www.openoffice.org/) Text 혹은 [LibreOffice](https://www.libreoffice.org/) Text 로 작성한 .odt 문서의 웹브라우저용 Viewer 이다.
 - 종래의 GrahaOdt2PdfConverter 는 GrahaViewer 로 통합되었다.
-- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.2
+- 최종버전 : https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.0

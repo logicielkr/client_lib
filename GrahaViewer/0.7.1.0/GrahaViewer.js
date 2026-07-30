@@ -171,6 +171,7 @@ GrahaViewer.close = function() {
 			GrahaViewer.removeBeforePrintEventListener();
 			GrahaViewer.removeAfterPrintEventListener();
 			GrahaViewer.removeResizeEventListener();
+			GrahaViewer.removeCopyEventListener();
 			window.setTimeout(function() {
 				$("body").css("margin-top", "");
 				resolve(true);
@@ -289,6 +290,7 @@ GrahaViewer.displayMenu = function(modifyDocumentTitle) {
 			GrahaViewer.addBeforePrintEventListener();
 			GrahaViewer.addAfterPrintEventListener();
 			GrahaViewer.addResizeEventListener();
+			GrahaViewer.addCopyEventListener();
 		}
 	}, 10);
 };
@@ -296,9 +298,10 @@ GrahaViewer.ready = function(opts, menus) {
 	if(opts && opts != null) {
 		GrahaViewer.opts = opts;
 	}
-	GrahaViewer.addBeforePrintEventListener();
-	GrahaViewer.addAfterPrintEventListener();
-	GrahaViewer.addResizeEventListener();
+//	GrahaViewer.addBeforePrintEventListener();
+//	GrahaViewer.addAfterPrintEventListener();
+//	GrahaViewer.addResizeEventListener();
+//	GrahaViewer.addCopyEventListener();
 	$(window).on("load", function() {
 		if(document.fonts) {
 			document.fonts.ready.then(function(fontFaceSet) {
@@ -482,6 +485,27 @@ GrahaViewer.addResizeEventListener = function() {
 GrahaViewer.removeResizeEventListener = function() {
 	window.removeEventListener("resize", GrahaViewer.resizeEventListener);
 };
+GrahaViewer.copyEventListener = function(event) {
+	var selection = window.getSelection();
+	if(selection != null) {
+		try {
+			var selectedText = selection.toString();
+			var customText = selectedText.replace(/\u{2000}/ug, ' ').replace(/\u{180E}/ug, '').replace(/\u{00A0}/ug, '');
+			event.clipboardData.setData("text/plain", customText);
+			event.preventDefault();
+		} catch (error) {
+			console.error(error);
+		}
+	}
+};
+
+GrahaViewer.addCopyEventListener = function() {
+	window.addEventListener("copy", GrahaViewer.copyEventListener);
+};
+GrahaViewer.removeCopyEventListener = function() {
+	window.removeEventListener("copy", GrahaViewer.copyEventListener);
+};
+
 GrahaViewer.beforePrintEventListener = function(event) {
 	if(window.document.documentMode) {
 		alert("IE 11 에서는 인쇄기능을 지원하지 않습니다.  PDF로 변환해서 PDF를 인쇄해 주세요.");

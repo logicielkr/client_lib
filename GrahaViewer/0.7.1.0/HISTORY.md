@@ -91,3 +91,10 @@
 ### 3.3. 0.7.0.2
 
 - GrahaViewer.print.css 는 GrahaViewer 가 웹페이지에 올라가 있는 경우에만 적용되도록 수정
+
+### 3.4. 0.7.1.0
+
+- [일부 legacy 브라우저에서 td 의 여백이 달라지는 경우가 있음. #22](https://github.com/logicielkr/client_lib/issues/22)
+- [GrahaViewer 의 hwpx.html 에서 파일 drag&drop 에러 발생 #21](https://github.com/logicielkr/client_lib/issues/21)
+- [GrahaViewer 에서 copy 를 하면 특수한 공백들은 제거하거나 일반적인 공백(" ") 으로 변경해서 반환해야 한다. #23](https://github.com/logicielkr/client_lib/issues/23)
+- odt.html 과 hwpx.html 에 preconnect, preload 를 추가함.

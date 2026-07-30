@@ -1,7 +1,7 @@
 body {
 	margin:10px;
 }
-input, textarea, select, td, th {
+input.graha, textarea.graha, select.graha, td.graha, th.graha {
 	font-size:18px;
 }
 table.graha {
@@ -32,7 +32,7 @@ table.graha tbody.graha td.graha a {
 	text-decoration:none;
 	font-size:18px;
 }
-h2.title {
+h2.graha.title {
 	margin:0;
 	margin-bottom:10px;
 	width:100%;

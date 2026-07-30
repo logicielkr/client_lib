@@ -5,9 +5,13 @@
 <meta charset="utf-8" />
 <title>GrahaHwpXViewer</title>
 
+<link rel="preconnect" href="//cdn.jsdelivr.net" />
 <link rel="preconnect" href="//fonts.googleapis.com" />
 <link rel="preconnect" href="//fonts.gstatic.com" crossorigin="anonymous" />
 <link href="//fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet" />
+
+<link rel="preload" href="//cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.min.css" as="style">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.min.css" />
 
 <script src="//cdn.jsdelivr.net/npm/bluebird@3.3.4/js/browser/bluebird.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/has-font@1.0.2/hasfont.min.js"></script>
@@ -40,8 +44,7 @@
 <script>
 GrahaViewer.ready();
 </script>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.min.css" />
 </head>
-<body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+<body ondrop="GrahaViewer.dropHandler(event);" ondragover="GrahaViewer.dragOverHandler(event);">
 </body>
 </html>

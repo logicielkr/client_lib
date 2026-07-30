@@ -1,5 +1,5 @@
 @media only screen and (max-width: 600px) {
-	div.nav {
+	div.graha.nav {
 		font-size:18px;
 		display: grid;
 		grid-template-columns: 3fr 4fr 3fr;

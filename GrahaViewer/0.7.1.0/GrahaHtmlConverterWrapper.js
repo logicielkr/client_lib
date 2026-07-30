@@ -326,7 +326,7 @@ GrahaHtmlConverterWrapper.prototype.getRootStyleText = function() {
 	styleText += "}\n";
 	
 	styleText += "body {";
-	styleText += "	margin-top: -" + Math.ceil($("body").outerHeight(true)) + "px;\n";
+	styleText += "	margin-top: -" + $("body").outerHeight(true) + "px;\n";
 	styleText += "}\n";
 
 	return styleText;
