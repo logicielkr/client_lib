@@ -25,10 +25,10 @@
  * GrahaOdt2PdfConverter 전체적인 사용법은 README.md 를 참조한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.7.0.2
+ * @version 0.7.1.1
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.0.2
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.1
  */
 
 function GrahaOdt2HtmlConverter() {
@@ -1205,13 +1205,15 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 	styleNode.setAttribute("type", "text/css");
 	if(root && root != null) {
 	} else {
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " p {margin: 0;z-index: 1;}"));
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " td {vertical-align:top;}"));
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " span.graha-text-justify {word-spacing: -3pt;}"));
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " span.graha_transparent {text-decoration: none;}"));
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " div.graha_draw_frame {display: none;position: relative;}"));
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " img.graha_draw_image {position: relative;}"));
-		styleNode.appendChild(document.createTextNode(this.htmlConverterWrapper.getLastFileWrapperClassSelector() + " div.graha_draw_frame_as_table {position: absolute;}"));
+		var fileWrapperSelector = this.htmlConverterWrapper.getLastFileWrapperClassSelector();
+//		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page, " + fileWrapperSelector + " p.graha_entire_page {font-size:10.5pt;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page p, " + fileWrapperSelector + " p.graha_entire_page p {margin: 0;z-index: 1;font-size:10.5pt;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page td, " + fileWrapperSelector + " p.graha_entire_page td {vertical-align:top;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page span.graha-text-justify, " + fileWrapperSelector + " p.graha_entire_page span.graha-text-justify {word-spacing: -3pt;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page span.graha_transparent, " + fileWrapperSelector + " p.graha_entire_page span.graha_transparent {text-decoration: none;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page div.graha_draw_frame, " + fileWrapperSelector + " p.graha_entire_page div.graha_draw_frame {display: none;position: relative;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page img.graha_draw_image, " + fileWrapperSelector + " p.graha_entire_page img.graha_draw_image {position: relative;}"));
+		styleNode.appendChild(document.createTextNode(fileWrapperSelector + " p.graha_page div.graha_draw_frame_as_table, " + fileWrapperSelector + " p.graha_entire_page div.graha_draw_frame_as_table {position: absolute;}"));
 		return styleNode;
 	}
 	var styles = this.getStyle();
@@ -1289,6 +1291,7 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			styleNode.appendChild(document.createTextNode(cssStyleRule));
 			
 			var cssStyleEntirePageRule = this.htmlConverterWrapper.getEntirePageStyleSelector() + " {\n";
+//			cssStyleEntirePageRule += "\tfont-size: 10.5pt;\n";
 			cssStyleEntirePageRule += "\tbox-sizing: border-box;\n";
 			cssStyleEntirePageRule += "\tmargin-top: 0;\n";
 			cssStyleEntirePageRule += "\tmargin-left: 0;\n";
@@ -1319,9 +1322,9 @@ GrahaOdt2HtmlConverter.prototype.style = function(root) {
 			cssStyleGrahaPageFootnoteRule += "\tbox-sizing: border-box;\n";
 			
 			var cssStylePageTemplateRule = this.htmlConverterWrapper.getPageStyleSelector() + " {\n";
+//			cssStylePageTemplateRule += "\tfont-size: 10.5pt;\n";
 			cssStylePageTemplateRule += "\tbox-sizing: border-box;\n";
 			cssStylePageTemplateRule += "\tposition: relative;\n";
-
 			cssStylePageTemplateRule += "\tbackground-color: white;\n";
 			if(this.pageLayout.pageWidth != null) {
 				styleNode.appendChild(document.createTextNode("@page {size: " + this.pageLayout.pageWidth + " " + this.pageLayout.pageHeight + ";}\n"));
@@ -2255,17 +2258,76 @@ GrahaOdt2HtmlConverter.prototype.finalizeTextJustify = function() {
 		}, 10);
 	});
 };
+/**********
+ * 아무것도 하지 않는다.
+ 
+ * libreoffice 에서는 줄간격이 100% 인 경우에도 글자 사이에 약간의 간격이 있지만,
+ * 웹브라우저는 줄간격이 100% 인 경우 글자가 위아래로 너무 다닥다닥 붙어 있는 현상이 있다.
+ 
+ * 일단을 주석으로 막아두기로 한다.
+ */
+/*
+GrahaOdt2HtmlConverter.prototype.applyParagraphFontSize = function(paragraph) {
+};
+*/
+/**********
+ * parentElement 에 따라서 다르게 처리하는데,
+ * openoffice 와 유사하게 표시된다.
+ 
+ * openoffice 와 비슷한 display 를 위한 것이다.
+ * 줄간격을 설정할 때, openoffice 와 libreoffice 의 차이가 있다.
+ * openoffice 는 parentElement 의 font-size 를 기준으로 줄간격을 계산하고,
+ * libreoffice 는 currentElement 의 그 것으로 줄간격을 계산한다.
+ 
+ * 문서의 meta 정보로 줄간격을 계산하도록 해도 되겠지만,
+ * libreoffice 가 그렇게 하지 않기 때문에, 
+ * 일단을 주석으로 막아두기로 한다.
+ */
+/*
 GrahaOdt2HtmlConverter.prototype.applyParagraphFontSize = function(paragraph) {
 	if($(paragraph).parent() && $(paragraph).parent() != null && $(paragraph).parent().length > 0) {
 		if($.trim($(paragraph).text()) != "") {
-			if(this.parseInt($(paragraph).parent().css("font-size")) > this.parseInt($(paragraph).css("font-size"))) {
+			var fontSize = this.parseInt($(paragraph).css("font-size"));
+			var parentFontSize = 0;
+			if($(paragraph).parent().hasClass("graha_page") || $(paragraph).parent().hasClass("graha_entire_page")) {
+				parentFontSize = fontSize + 2;
+			} else {
+				parentFontSize = this.parseInt($(paragraph).parent().css("font-size"));
+			}
+			if(parentFontSize > fontSize) {
 				if(
 					paragraph.childNodes.length > 0 &&
 					paragraph.firstChild.nodeName == "FONT"
 				) {
-					$(paragraph.firstChild).css("font-size", $(paragraph).css("font-size"));
-					$(paragraph).css("font-size", $(paragraph).parent().css("font-size"));
+					$(paragraph.firstChild).css("font-size", fontSize + "px");
+					$(paragraph).css("font-size", parentFontSize + "px");
 				}
+			}
+		}
+	}
+};
+*/
+/**********
+ * parentElement 의 글자크기 * 115 / 100 로 처리한다.
+ * libreoffice 와 유사하게 표시된다.
+ 
+ * 이 함수는 잠재적인 것이다.
+ * 향후에 경험적인 test 를 거쳐 확정할 예정이다.
+ 
+ * libreoffice 는 기본 줄간격이 있는 것으로 생각되기도 하는데, 추후에 검토하기로 한다.
+ */
+GrahaOdt2HtmlConverter.prototype.applyParagraphFontSize = function(paragraph) {
+	if($(paragraph).parent() && $(paragraph).parent() != null && $(paragraph).parent().length > 0) {
+		if($.trim($(paragraph).text()) != "") {
+			var fontSize = this.parseInt($(paragraph).css("font-size"));
+			var parentFontSize = 0;
+			parentFontSize = fontSize * 115 / 100;
+			if(
+				paragraph.childNodes.length > 0 &&
+				paragraph.firstChild.nodeName == "FONT"
+			) {
+				$(paragraph.firstChild).css("font-size", fontSize + "px");
+				$(paragraph).css("font-size", parentFontSize + "px");
 			}
 		}
 	}
@@ -2563,6 +2625,9 @@ GrahaOdt2HtmlConverter.prototype.finalizeHtml = function(htmlElement, pdfPropert
 };
 GrahaOdt2HtmlConverter.prototype.convertToPx = function(value, defaultValue) {
 	return GrahaConverterUtility.convertToPx(value, defaultValue);
+};
+GrahaOdt2HtmlConverter.prototype.convertToPxFromPt = function(value) {
+	return GrahaConverterUtility.convertToPxWithUnit(value, "pt");
 };
 GrahaOdt2HtmlConverter.prototype.getValueStripUnit = function(value, unit) {
 	return GrahaConverterUtility.getValueStripUnit(value, unit);

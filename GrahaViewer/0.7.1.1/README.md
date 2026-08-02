@@ -11,7 +11,7 @@ GrahaViewer 는 웹브라우저에서 동작하는 다음 2가지 형식의 HTML
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.0
+https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.1
 
 ### 1.3. 호환성
 

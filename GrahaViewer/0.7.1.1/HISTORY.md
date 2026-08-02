@@ -98,3 +98,7 @@
 - [GrahaViewer 의 hwpx.html 에서 파일 drag&drop 에러 발생 #21](https://github.com/logicielkr/client_lib/issues/21)
 - [GrahaViewer 에서 copy 를 하면 특수한 공백들은 제거하거나 일반적인 공백(" ") 으로 변경해서 반환해야 한다. #23](https://github.com/logicielkr/client_lib/issues/23)
 - odt.html 과 hwpx.html 에 preconnect, preload 를 추가함.
+
+### 3.5. 0.7.1.1
+
+- [GrahaViewer 의 odt.html 에서 odt 문서에서 정의된 줄간격이 100% 인 경우 libreoffice 에 비해 글자 사이의 위아래 간격이 너무 없다. #24](https://github.com/logicielkr/client_lib/issues/24)
