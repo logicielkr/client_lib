@@ -102,3 +102,7 @@
 ### 3.5. 0.7.1.1
 
 - [GrahaViewer 의 odt.html 에서 odt 문서에서 정의된 줄간격이 100% 인 경우 libreoffice 에 비해 글자 사이의 위아래 간격이 너무 없다. #24](https://github.com/logicielkr/client_lib/issues/24)
+
+### 3.6. 0.7.1.2
+
+- [GrahaViewer 에서 "TypeError: Buffer.isBuffer is not a function" 에러 발생 처리 #31](https://github.com/logicielkr/client_lib/issues/31)

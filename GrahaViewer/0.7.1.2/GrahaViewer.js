@@ -23,10 +23,10 @@
  * odt 혹은 hwpx 을 HTML 로 변환한다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.7.1.1
+ * @version 0.7.1.2
  * @since 0.7
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.1
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.2
  */
 
 function GrahaViewer() {
@@ -533,6 +533,7 @@ GrahaViewer.removeAfterPrintEventListener = function() {
 	window.removeEventListener("afterprint", GrahaViewer.afterPrintEventListener);
 };
 GrahaViewer.initMenu = function() {
+	JSZip.support.nodebuffer = false;
 	return new Promise(function(resolve, reject) {
 		window.setTimeout(function() {
 			try {
