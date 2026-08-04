@@ -45,3 +45,8 @@
 
 - [graha_base_library 에서 html tag 에 걸려있는 css 는 제거해야 한다. #20](https://github.com/logicielkr/client_lib/issues/20)
 - graha 버전도 0.7.1.0 이상이어야 하며, 그 이하인 경우 페이지 layout 이 깨질 수 있음.
+
+### 2.2.	0.7.2.0
+
+- [graha_base_library 의 fn_check.js 에 _numberFormat 세 번째 파라미터(자료형 = t) 가 float 인 경우 0과 음수 처리 에러 #34](https://github.com/logicielkr/client_lib/issues/34)
+- [graha_base_library 에서 추가로 필요한 함수 #35](https://github.com/logicielkr/client_lib/issues/35)
