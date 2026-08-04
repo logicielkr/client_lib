@@ -21,23 +21,24 @@
 /**
  * NumberParser.js
  * 
-* [파라미터가 3개인 경우]
+ * [파라미터가 3개인 경우]
  *
  * 첫 번째 파라미터 : HTML Form
  * 두 번째 파라미터 : HTML Form 내의 요소의 이름(name 속성)
  * 세 번째 파라미터 : 데이타 타입 (int, long, float, double)
- *
+ * HTML Form 내의 요소의 value 가 비어 있는 경우("") 0 을 반환한다.
  *
  * [파라미터가 2개인 경우]
  *
  * 첫 번째 파라미터 : 숫자로 변환할 문자열
  * 두 번째 파라미터 : 데이타 타입 (int, long, float, double)
- *
+ * 첫 번째 파라미터 숫자로 변환할 문자열이 비어 있는 경우 0 을 반환한다.
  *
  * [파라미터가 1개인 경우]
  *
  * 첫 번째 파라미터 : 숫자로 변환할 문자열
  * 숫자로 변환할 문자열 내에 "." 이 있는 경우 double 로, 그렇지 않은 경우 long 으로 변환한다.
+ * 첫 번째 파라미터 숫자로 변환할 문자열이 비어 있는 경우 0 을 반환한다.
  *
  * @author HeonJik, KIM (https://graha.kr)
  * @version 0.5.0.5
@@ -46,16 +47,17 @@
 
 function NumberParser() {
 }
-
 NumberParser.parse = function(form, name, t) {
 	var v = null;
 	var dataType = null;
 	if(arguments.length == 3) {
-		if(!_notNull(form, name)) {
-			return 0;
-		}
 		var obj = form[name];
 		v = obj.value;
+		if(v == null) {
+			return 0;
+		} else if(v == "") {
+			return 0;
+		}
 		dataType = t;
 	} else if(arguments.length == 2) {
 		v = arguments[0];
@@ -89,7 +91,11 @@ NumberParser.parse = function(form, name, t) {
 	} else if(dataType == "float" || dataType == "double") {
 		if(!isNaN(Number(v)) && !isNaN(parseFloat(v))) {
 			if(dataType == "float") {
-				if(parseFloat(v) >= 1.4E-45 && parseFloat(v) <= 3.4028235E38) {
+				if(
+					parseFloat(v) == 0 ||
+					(parseFloat(v) >= 1.4E-45 && parseFloat(v) <= 3.4028235E38) ||
+					(parseFloat(v) >= -3.4028235E38 && parseFloat(v) <= -1.4E-45)
+				) {
 					return parseFloat(v);
 				} else {
 					return NaN;

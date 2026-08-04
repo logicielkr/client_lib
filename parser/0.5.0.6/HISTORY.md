@@ -33,3 +33,8 @@
 
 - 디렉토리 이름을 "date_parser" 에서 "parser" 로 변경
 - NumberParser.js 추가
+
+### 1.5. 0.5.0.6
+
+- [graha_base_library 의 fn_check.js 에 _numberFormat 세 번째 파라미터(자료형 = t) 가 float 인 경우 0과 음수 처리 에러 #34](https://github.com/logicielkr/client_lib/issues/34)
+- [NumberParser.js 에서 _notNull 함수 추가 #32](https://github.com/logicielkr/client_lib/issues/32)

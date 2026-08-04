@@ -8,7 +8,7 @@
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/parser/0.5.0.5
+https://github.com/logicielkr/client_lib/tree/master/parser/0.5.0.6
 
 ### 1.3. 호환성
 
@@ -71,7 +71,7 @@ DateParser.js 예제는 test.html 파일에서 찾을 수 있고, input 요소�
 
 ### 1.2. 다운로드
 
-https://github.com/logicielkr/client_lib/tree/master/parser/0.5.0.5
+https://github.com/logicielkr/client_lib/tree/master/parser/0.5.0.6
 
 ### 1.3. 호환성
 
@@ -88,6 +88,7 @@ https://github.com/logicielkr/client_lib/tree/master/parser/0.5.0.5
 - NumberParser.parse("1") : 1
 - NumberParser.parse("1.1") : 1.1
 - NumberParser.parse("1,000") : 1000
+- NumberParser.parse("") : 0
 
 입력값에 소수점이 포함되어 있으면, parseFloat을 그렇지 않으면 parseInt 로 처리한다.
 
@@ -95,6 +96,7 @@ https://github.com/logicielkr/client_lib/tree/master/parser/0.5.0.5
 
 - NumberParser.parse("1", "int") : 1
 - NumberParser.parse("1.1", "float") : 1.1
+- NumberParser.parse("", "float") : 0
 
 2번 째 파라미터는 Data Type 이며, 다음 중 1개이어야 한다.
 
@@ -113,3 +115,4 @@ HTML Form 아래의 Element 값을 얻어서 Number Type 으로 변형한다.
 
 - NumberParser.parse(form, elementName, "int")
 
+> form[elementName].value 가 null 이거나 비어있는 경우("") 0 을 반환한다.
