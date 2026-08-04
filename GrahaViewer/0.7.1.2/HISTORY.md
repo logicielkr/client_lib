@@ -106,3 +106,4 @@
 ### 3.6. 0.7.1.2
 
 - [GrahaViewer 에서 "TypeError: Buffer.isBuffer is not a function" 에러 발생 처리 #31](https://github.com/logicielkr/client_lib/issues/31)
+- [GrahaViewer 의 hwpx.html 에서 동그라미 "인" 문자 처리 오류 #27](https://github.com/logicielkr/client_lib/issues/27)

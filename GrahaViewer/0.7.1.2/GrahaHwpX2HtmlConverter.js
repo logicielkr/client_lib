@@ -3095,7 +3095,7 @@ GrahaHwpX2HtmlConverter.prototype.span = function(node, parentElement, prefixTex
 					console.error(node.childNodes[i]);
 				}
 			} else if(Node.TEXT_NODE == node.childNodes[i].nodeType) {
-				this.appendText(node.childNodes[i].nodeValue, span);
+				this.appendText((node.childNodes[i].nodeValue).replace(/\udb80\udc99/, '\u329e').replace(/\udb80\udd2b/, '\u329e'), span);
 			} else {
 				console.error(node.childNodes[i]);
 			}
