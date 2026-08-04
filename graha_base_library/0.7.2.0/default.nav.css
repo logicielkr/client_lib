@@ -1,0 +1,70 @@
+div.graha.nav {
+	font-size:18px;
+	margin-bottom:5px;
+	margin-top:5px;
+	clear:both;
+	width:100%;
+	display: grid;
+	display:-ms-grid;
+	-ms-grid-columns: 1fr 2fr 1fr;
+	grid-template-columns: 1fr 2fr 1fr;
+}
+div.graha.nav div.graha.left {
+	-ms-grid-column:1;
+	text-align:left;
+}
+div.graha.nav div.graha.center {
+	-ms-grid-column:2;
+	text-align:center;
+}
+div.graha.nav div.graha.right {
+	-ms-grid-column:3;
+	text-align:right;
+}
+@supports not (display: grid) {
+	div.graha.nav {
+		font-size:18px;
+		margin-bottom:5px;
+		margin-top:5px;
+		clear:both;
+		width:100%;
+		display:block;
+	}
+	div.graha.nav div.graha.left {
+		float: left;
+		width: 25%;
+		min-width:25%;
+		text-align:left;
+		display:block;
+	}
+	div.graha.nav div.graha.center {
+		float: left;
+		width: 50%;
+		min-width: 50%;
+		text-align:center;
+		display:block;
+	}
+	div.graha.nav div.graha.right {
+		float: right;
+		width: 25%;
+		min-width:25%;
+		text-align:right;
+		display:block;
+	}
+}
+div.graha.nav form.graha {
+	display:inline;
+	font-size:18px;
+}
+div.graha.nav div.graha.box ul.graha.pages {
+	list-style:none;
+	margin:0px;
+	display:inline-block;
+	padding:0px;
+}
+div.graha.nav div.graha.box li.graha.page {
+	margin:0px;
+	display:inline;
+	padding-right:3px;
+	padding-left:3px;
+}
