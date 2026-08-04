@@ -97,11 +97,7 @@ function _numberFormat(form, name, t) {
 	} else if(t == "float" || t == "double") {
 		if(!isNaN(Number(v)) && !isNaN(parseFloat(v))) {
 			if(t == "float") {
-				if(
-					parseFloat(v) == 0 ||
-					(parseFloat(v) >= 1.4E-45 && parseFloat(v) <= 3.4028235E38) ||
-					(parseFloat(v) >= -3.4028235E38 && parseFloat(v) <= -1.4E-45) ||
-				) {
+				if(parseFloat(v) >= 1.4E-45 && parseFloat(v) <= 3.4028235E38) {
 					return true;
 				} else {
 					return false;

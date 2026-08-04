@@ -100,7 +100,7 @@ function _numberFormat(form, name, t) {
 				if(
 					parseFloat(v) == 0 ||
 					(parseFloat(v) >= 1.4E-45 && parseFloat(v) <= 3.4028235E38) ||
-					(parseFloat(v) >= -3.4028235E38 && parseFloat(v) <= -1.4E-45) ||
+					(parseFloat(v) >= -3.4028235E38 && parseFloat(v) <= -1.4E-45)
 				) {
 					return true;
 				} else {
