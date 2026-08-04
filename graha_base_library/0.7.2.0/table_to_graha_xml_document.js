@@ -37,13 +37,13 @@
  */
 
 function table_to_graha_xml_document() {
-	var obj = new Object();
-	obj.rows = new Object();
+	var grahaXML = document.implementation.createDocument(null, "document", null);
 	var insert = false;
 	$("form.graha table.graha").add("form.graha div.graha.table").each(function() {
 		var rowsId = $(this).attr("id");
-		obj.rows[rowsId] = new Array();
-		var row = new Object();
+		var rows = grahaXML.createElement("rows");
+		rows.setAttribute("id", rowsId);
+		var row = grahaXML.createElement("row");
 		$(this).find("input.graha").add($(this).find("select.graha")).add($(this).find("textarea.graha")).each(function() {
 			var type = $(this).attr("type");
 			if(type != "submit" && type != "button") {
@@ -51,21 +51,31 @@ function table_to_graha_xml_document() {
 				if(name.indexOf("graha ") == 0) {
 					name = name.substring("graha ".length);
 				}
-				if(row.hasOwnProperty(name)) {
-					obj.rows[rowsId].push(row);
-					row = new Object();
+				if(row.getElementsByTagName(name).length > 0) {
+					rows.appendChild(row);
+					row = grahaXML.createElement("row");
 				}
-				row[name] = $(this).val();
+				var value = null;
+				if($(this).prop("nodeName") == "SELECT") {
+					value = $(this).find(":selected").val(); 
+				} else {
+					value = $(this).val();
+				}
+				var item = grahaXML.createElement(name);
+				item.textContent = value;
+				row.appendChild(item);
 				insert = true;
 			}
 		});
-		obj.rows[rowsId].push(row);
+		rows.appendChild(row);
+		grahaXML.documentElement.appendChild(rows);
 	});
 	if(!insert) {
 		$("table.graha").add("div.graha.table").each(function() {
 			var rowsId = $(this).attr("id");
-			obj.rows[rowsId] = new Array();
-			var row = new Object();
+			var rows = grahaXML.createElement("rows");
+			rows.setAttribute("id", rowsId);
+			var row = grahaXML.createElement("row");
 			$(this).find("div.graha.td").add($(this).find("td.graha")).each(function() {
 				var name = $(this).attr("class");
 				if(name.indexOf("graha td ") == 0) {
@@ -73,14 +83,17 @@ function table_to_graha_xml_document() {
 				} else if(name.indexOf("graha ") == 0) {
 					name = name.substring("graha ".length);
 				}
-				if(row.hasOwnProperty(name)) {
-					obj.rows[rowsId].push(row);
-					row = new Object();
+				if(row.getElementsByTagName(name).length > 0) {
+					rows.appendChild(row);
+					row = grahaXML.createElement("row");
 				}
-				row[name] = $(this).text();
+				var item = grahaXML.createElement(name);
+				item.textContent = $(this).text();
+				row.appendChild(item);
 			});
-			obj.rows[rowsId].push(row);
+			rows.appendChild(row);
+			grahaXML.documentElement.appendChild(rows);
 		});
 	}
-	return obj;
+	return grahaXML;
 }

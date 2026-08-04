@@ -55,7 +55,13 @@ function table_to_graha_object() {
 					obj.rows[rowsId].push(row);
 					row = new Object();
 				}
-				row[name] = $(this).val();
+				var value = null;
+				if($(this).prop("nodeName") == "SELECT") {
+					value = $(this).find(":selected").val(); 
+				} else {
+					value = $(this).val();
+				}
+				row[name] = value;
 				insert = true;
 			}
 		});
