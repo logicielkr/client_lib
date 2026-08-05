@@ -27,10 +27,10 @@
  * 0.7.0.0 에서 GrahaPdfConverter 에서 GrahaConverter 로 변경되었다.
 
  * @author HeonJik, KIM (https://graha.kr)
- * @version 0.7.1.2
+ * @version 0.7.1.3
  * @since 0.5
  * 최종 버전은 다음의 경로에서 다운로드 할 수 있다.
- * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.2
+ * https://github.com/logicielkr/client_lib/tree/master/GrahaViewer/0.7.1.3
  */
 
 function GrahaConverter(options) {

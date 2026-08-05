@@ -107,3 +107,8 @@
 
 - [GrahaViewer 에서 "TypeError: Buffer.isBuffer is not a function" 에러 발생 처리 #31](https://github.com/logicielkr/client_lib/issues/31)
 - [GrahaViewer 의 hwpx.html 에서 동그라미 "인" 문자 처리 오류 #27](https://github.com/logicielkr/client_lib/issues/27)
+
+### 3.6. 0.7.1.3
+
+- [일부 legacy 브라우저에서 정규식 에러 발생 등 #36](https://github.com/logicielkr/client_lib/issues/36)
+- [한글] 2014 와 [한글] 최신버전 사이에 header.xml 파일을 변환하는 GrahaHwpXVersionConverter 추가
