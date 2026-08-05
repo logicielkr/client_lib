@@ -1,0 +1,66 @@
+@page {
+	margin: 0px;
+}
+div#GrahaHtmlConverterWrapper,
+div#GrahaHtmlConverterScaleWrapper,
+div.GrahaHtmlConverterFileWrapper
+{
+	margin-left: auto;
+	margin-right: auto;
+}
+div.GrahaHtmlConverterFileWrapper p {
+	line-height: 100%;
+}
+
+div.GrahaHtmlConverterFileWrapper * {
+	font-size: unset;
+	line-height: unset;
+	margin: 0;
+	padding: 0;
+}
+div.GrahaHtmlConverterFileWrapper p.graha_page,
+div.GrahaHtmlConverterFileWrapper p.graha_entire_page {
+	margin-bottom: 10px;
+}
+div#graha_viewer_menu_wrapper {
+	position:fixed;
+	top:0;
+	left:0;
+	text-align:center;
+	height:35px;
+	background-color:rgb(249, 249, 250);
+	width:100%;
+	z-index:100;
+	vertical-align:middle;
+	box-shadow:rgb(184, 184, 184) 0px 1px 0px 0px;
+}
+
+div#graha_viewer_menu_items {
+	position: absolute;
+	top: 50%;
+	transform: translate(0%, -50%);
+	font-size:12pt;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center;
+	width:100%;
+}
+
+span#graha_viewer_split,
+span#graha_viewer_pdf,
+span#graha_viewer_print,
+span#graha_viewer_download,
+span#graha_viewer_close
+{
+	display:none;
+}
+
+div.graha_viewer_container {
+	width:100%;
+	display: block;
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	height:calc(100% - 35px);
+	background-color:rgb(212, 212, 215);
+}
